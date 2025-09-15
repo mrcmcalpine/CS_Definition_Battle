@@ -76,7 +76,7 @@ async function loadWords(){
     if(!response.ok) throw new Error('Could not load words.json');
     words = await response.json();
   }catch(e){
-    clueBox.textContent='Error loading words.json.';
+    clueBox.textContent='Error loading words.json!';
     console.error(e);
   }
 }
