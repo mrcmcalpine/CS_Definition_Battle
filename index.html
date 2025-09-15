@@ -21,6 +21,7 @@
     #leaderboardList li { margin:5px 0; font-size:1.1rem; }
     #feedback { font-size:1.3rem; font-weight:bold; }
     #incorrectWordsBox { text-align:left; max-width:500px; }
+    #clearHistoryBtn { margin-top:10px; padding:5px 10px; font-size:0.9rem; border-radius:12px; }
   </style>
 </head>
 <body>
@@ -40,6 +41,7 @@
   <div id="feedback"></div>
   <div id="scoreBox">Score: 0</div>
   <div id="incorrectWordsBox"></div>
+  <button id="clearHistoryBtn">Clear History</button>
   <div id="leaderboard">
     <h2>Leaderboard 🏆</h2>
     <ul id="leaderboardList"></ul>
@@ -66,8 +68,8 @@ const scoreBox = document.getElementById("scoreBox");
 const feedback = document.getElementById("feedback");
 const leaderboardList = document.getElementById("leaderboardList");
 const incorrectWordsBox = document.getElementById("incorrectWordsBox");
+const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
-// Load words from external JSON
 async function loadWords(){
   try{
     const response = await fetch('./words.json');
@@ -120,6 +122,27 @@ function revealRandomLetter(){
   }
 }
 
+function loadHistoricIncorrect(){
+  const historic = JSON.parse(localStorage.getItem('historicIncorrect')||'[]');
+  return historic;
+}
+
+function saveHistoricIncorrect(word){
+  let historic = loadHistoricIncorrect();
+  if(!historic.includes(word)) historic.push(word);
+  localStorage.setItem('historicIncorrect', JSON.stringify(historic));
+}
+
+function displayIncorrectWords(){
+  let historic = loadHistoricIncorrect();
+  let combined = [...new Set([...historic, ...incorrectWords])];
+  if(combined.length===0){
+    incorrectWordsBox.textContent='';
+    return;
+  }
+  incorrectWordsBox.innerHTML='<strong>Incorrect Words (Historic):</strong> '+combined.join(', ');
+}
+
 function checkGuess(){
   if(!gameStarted) return;
   const guess=guessInput.value.trim().toLowerCase();
@@ -136,7 +159,10 @@ function checkGuess(){
     revealRandomLetter();
     showClues();
     feedback.textContent='❌ Wrong!';
-    if(!incorrectWords.includes(currentWord.answer)) incorrectWords.push(currentWord.answer);
+    if(!incorrectWords.includes(currentWord.answer)){
+      incorrectWords.push(currentWord.answer);
+      saveHistoricIncorrect(currentWord.answer);
+    }
     displayIncorrectWords();
     if(lives<=0){
       feedback.textContent=`💀 Game Over! Word was: ${currentWord.answer}`;
@@ -148,14 +174,6 @@ function checkGuess(){
     }
   }
   guessInput.value='';
-}
-
-function displayIncorrectWords(){
-  if(incorrectWords.length===0){
-    incorrectWordsBox.textContent='';
-    return;
-  }
-  incorrectWordsBox.innerHTML='<strong>Incorrect Words:</strong> '+incorrectWords.join(', ');
 }
 
 function saveLocalLeaderboard(){
@@ -192,12 +210,18 @@ submitNameBtn.addEventListener('click',async ()=>{
   await loadWords();
   pickWord();
   displayLocalLeaderboard();
+  displayIncorrectWords();
 });
 
 submitBtn.addEventListener('click',checkGuess);
 guessInput.addEventListener('keyup',e=>{if(e.key==='Enter') checkGuess();});
 startBtn.addEventListener('click',()=>{score=0;lives=5;incorrectWords=[];scoreBox.textContent=`Score: ${score}`;livesBox.textContent=`Lives: ${lives}`;guessInput.disabled=false;submitBtn.disabled=false;playAgainBtn.style.display='none';gameStarted=true;pickWord();displayIncorrectWords();});
 playAgainBtn.addEventListener('click',()=>{score=0;lives=5;incorrectWords=[];scoreBox.textContent=`Score: ${score}`;livesBox.textContent=`Lives: ${lives}`;guessInput.disabled=false;submitBtn.disabled=false;playAgainBtn.style.display='none';gameStarted=true;pickWord();displayIncorrectWords();});
+
+clearHistoryBtn.addEventListener('click',()=>{
+  localStorage.removeItem('historicIncorrect');
+  displayIncorrectWords();
+});
 </script>
 </body>
 </html>
