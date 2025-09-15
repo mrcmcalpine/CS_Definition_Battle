@@ -4,12 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Word Guess Challenge</title>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #6a11cb, #2575fc); color: #fff; text-align: center; padding: 20px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
     h1 { font-size: 2.5rem; margin-bottom: 20px; }
-    #clueBox, #wordBox, #livesBox, #scoreBox, #feedback { margin: 10px 0; font-size: 1.2rem; }
+    #clueBox, #wordBox, #livesBox, #scoreBox, #feedback, #incorrectWordsBox { margin: 10px 0; font-size: 1.2rem; }
     #clueBox { text-align: left; max-width: 500px; }
     .clue { opacity: 0; transform: translateY(10px); animation: fadeIn 0.6s ease forwards; margin: 5px 0; padding: 8px 12px; background: rgba(255,255,255,0.15); border-radius: 8px; }
     @keyframes fadeIn { to { opacity:1; transform:translateY(0); } }
@@ -22,6 +20,7 @@
     #leaderboardList { list-style:none; padding:0; text-align:left; }
     #leaderboardList li { margin:5px 0; font-size:1.1rem; }
     #feedback { font-size:1.3rem; font-weight:bold; }
+    #incorrectWordsBox { text-align:left; max-width:500px; }
   </style>
 </head>
 <body>
@@ -40,31 +39,17 @@
   <button id="playAgainBtn" style="display:none;">Play Again</button>
   <div id="feedback"></div>
   <div id="scoreBox">Score: 0</div>
+  <div id="incorrectWordsBox"></div>
   <div id="leaderboard">
     <h2>Leaderboard 🏆</h2>
     <ul id="leaderboardList"></ul>
   </div>
 </div>
 <script>
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
 let words = [];
-let currentWord;
-let clueIndex = 0;
-let score = 0;
-let lives = 5;
-let revealedLetters = [];
-let gameStarted = false;
-let playerName = '';
+let currentWord, clueIndex=0, score=0, lives=5, revealedLetters=[], gameStarted=false;
+let playerName='';
+let incorrectWords=[];
 
 const namePrompt = document.getElementById('namePrompt');
 const playerNameInput = document.getElementById('playerNameInput');
@@ -80,90 +65,139 @@ const playAgainBtn = document.getElementById("playAgainBtn");
 const scoreBox = document.getElementById("scoreBox");
 const feedback = document.getElementById("feedback");
 const leaderboardList = document.getElementById("leaderboardList");
+const incorrectWordsBox = document.getElementById("incorrectWordsBox");
 
-async function loadWords() {
-  try {
+// Load words from external JSON
+async function loadWords(){
+  try{
     const response = await fetch('./words.json');
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    if(!response.ok) throw new Error('Could not load words.json');
     words = await response.json();
-  } catch (e) {
-    clueBox.textContent = 'Error loading words.json. Check file location and format.';
+  }catch(e){
+    clueBox.textContent='Error loading words.json.';
     console.error(e);
   }
 }
 
-function pickWord() {
-  if (!words || words.length === 0) return;
-  currentWord = words[Math.floor(Math.random() * words.length)];
-  clueIndex = 0;
-  revealedLetters = Array(currentWord.answer.length).fill(false);
+function pickWord(){
+  currentWord = words[Math.floor(Math.random()*words.length)];
+  clueIndex=0;
+  revealedLetters=Array(currentWord.answer.length).fill(false);
   displayWordProgress();
   showClues();
-  feedback.textContent = '';
-  guessInput.value = '';
+  feedback.textContent='';
+  guessInput.value='';
   guessInput.maxLength = currentWord.answer.length;
 }
 
-function showClues() {
-  clueBox.innerHTML = '';
-  for (let i = 0; i <= clueIndex; i++) {
-    if (currentWord.clues[i]) {
-      const clueDiv = document.createElement('div');
-      clueDiv.className = 'clue';
-      clueDiv.textContent = `Clue ${i+1}: ${currentWord.clues[i]}`;
-      clueBox.appendChild(clueDiv);
+function showClues(){
+  clueBox.innerHTML='';
+  for(let i=0;i<=clueIndex;i++){
+    if(currentWord.clues[i]){
+      const d=document.createElement('div');
+      d.className='clue';
+      d.textContent=`Clue ${i+1}: ${currentWord.clues[i]}`;
+      clueBox.appendChild(d);
     }
   }
 }
 
-function displayWordProgress() {
-  if (!currentWord) return;
-  let display = '';
-  for (let i = 0; i < currentWord.answer.length; i++) {
-    display += revealedLetters[i] ? currentWord.answer[i] + ' ' : '_ ';
+function displayWordProgress(){
+  let display='';
+  for(let i=0;i<currentWord.answer.length;i++){
+    display += revealedLetters[i]?currentWord.answer[i]+' ':'_ ';
   }
-  wordBox.textContent = display.trim();
+  wordBox.textContent=display.trim();
 }
 
-function revealRandomLetter() {
-  if (!currentWord) return;
-  const unrevealed = [];
-  for (let i = 0; i < currentWord.answer.length; i++) if (!revealedLetters[i]) unrevealed.push(i);
-  if (unrevealed.length > 0) {
-    const randIndex = unrevealed[Math.floor(Math.random() * unrevealed.length)];
-    revealedLetters[randIndex] = true;
+function revealRandomLetter(){
+  const unrevealed=[];
+  for(let i=0;i<currentWord.answer.length;i++) if(!revealedLetters[i]) unrevealed.push(i);
+  if(unrevealed.length>0){
+    const idx=unrevealed[Math.floor(Math.random()*unrevealed.length)];
+    revealedLetters[idx]=true;
     displayWordProgress();
   }
 }
 
-async function submitScore() {
-  if (!playerName) return;
-
-  // Fetch current top 10 scores
-  const snapshot = await db.collection("leaderboard").orderBy("score", "desc").limit(10).get();
-  let scores = snapshot.docs.map(doc => doc.data().score);
-
-  // If current score beats lowest top score or less than 10 entries, add it
-  if (scores.length < 10 || score > Math.min(...scores)) {
-    await db.collection("leaderboard").add({ name: playerName, score: score, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+function checkGuess(){
+  if(!gameStarted) return;
+  const guess=guessInput.value.trim().toLowerCase();
+  if(!guess) return;
+  if(guess===currentWord.answer.toLowerCase()){
+    score += 5-clueIndex*2>0?5-clueIndex*2:0;
+    scoreBox.textContent=`Score: ${score}`;
+    feedback.textContent='✅ Correct!';
+    pickWord();
+  }else{
+    clueIndex++;
+    lives--;
+    livesBox.textContent=`Lives: ${lives}`;
+    revealRandomLetter();
+    showClues();
+    feedback.textContent='❌ Wrong!';
+    if(!incorrectWords.includes(currentWord.answer)) incorrectWords.push(currentWord.answer);
+    displayIncorrectWords();
+    if(lives<=0){
+      feedback.textContent=`💀 Game Over! Word was: ${currentWord.answer}`;
+      guessInput.disabled=true;
+      submitBtn.disabled=true;
+      playAgainBtn.style.display='inline-block';
+      gameStarted=false;
+      saveLocalLeaderboard();
+    }
   }
-  fetchLeaderboard();
+  guessInput.value='';
 }
 
-async function fetchLeaderboard() {
-  const snapshot = await db.collection("leaderboard").orderBy("score", "desc").limit(10).get();
-  leaderboardList.innerHTML = "";
-  snapshot.forEach((doc, index) => {
-    const entry = doc.data();
-    const li = document.createElement("li");
-    li.textContent = `${index + 1}. ${entry.name} - ${entry.score}`;
+function displayIncorrectWords(){
+  if(incorrectWords.length===0){
+    incorrectWordsBox.textContent='';
+    return;
+  }
+  incorrectWordsBox.innerHTML='<strong>Incorrect Words:</strong> '+incorrectWords.join(', ');
+}
+
+function saveLocalLeaderboard(){
+  let leaderboard=JSON.parse(localStorage.getItem('leaderboard')||'[]');
+  leaderboard.push({name:playerName, score:score, timestamp:new Date().toISOString()});
+  leaderboard.sort((a,b)=>b.score-a.score);
+  leaderboard=leaderboard.slice(0,10);
+  localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+  displayLocalLeaderboard();
+}
+
+function displayLocalLeaderboard(){
+  let leaderboard=JSON.parse(localStorage.getItem('leaderboard')||'[]');
+  leaderboardList.innerHTML='';
+  leaderboard.forEach((entry,i)=>{
+    const li=document.createElement('li');
+    li.textContent=`${i+1}. ${entry.name} - ${entry.score}`;
     leaderboardList.appendChild(li);
   });
 }
 
-function checkGuess() {
-  if (!gameStarted || !currentWord) return;
-  const guess = guessInput.value.trim().toLowerCase();
-  if (!guess) return;
-  if (guess === currentWord.answer.toLowerCase()) {
-    score += 
+submitNameBtn.addEventListener('click',async ()=>{
+  const name=playerNameInput.value.trim();
+  if(!name){alert('Enter a name'); return;}
+  playerName=name;
+  namePrompt.style.display='none';
+  gameUI.style.display='block';
+  score=0;lives=5;incorrectWords=[];
+  scoreBox.textContent=`Score: ${score}`;
+  livesBox.textContent=`Lives: ${lives}`;
+  guessInput.disabled=false;
+  submitBtn.disabled=false;
+  gameStarted=true;
+  await loadWords();
+  pickWord();
+  displayLocalLeaderboard();
+});
+
+submitBtn.addEventListener('click',checkGuess);
+guessInput.addEventListener('keyup',e=>{if(e.key==='Enter') checkGuess();});
+startBtn.addEventListener('click',()=>{score=0;lives=5;incorrectWords=[];scoreBox.textContent=`Score: ${score}`;livesBox.textContent=`Lives: ${lives}`;guessInput.disabled=false;submitBtn.disabled=false;playAgainBtn.style.display='none';gameStarted=true;pickWord();displayIncorrectWords();});
+playAgainBtn.addEventListener('click',()=>{score=0;lives=5;incorrectWords=[];scoreBox.textContent=`Score: ${score}`;livesBox.textContent=`Lives: ${lives}`;guessInput.disabled=false;submitBtn.disabled=false;playAgainBtn.style.display='none';gameStarted=true;pickWord();displayIncorrectWords();});
+</script>
+</body>
+</html>
