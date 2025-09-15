@@ -104,7 +104,7 @@
     "clues": [
       
       "forwarded by routers",
-      "contains the IP address of sender and reciever,
+      "contains the IP address of sender and reciever",
       "has a header, trailer and payload",
       
     ]
