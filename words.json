@@ -3,24 +3,303 @@
     "answer": "Analysis",
     "clues": [
       "Abstraction of the problem",
-      "Breaking down into components",
-      "Understanding patterns and meaning"
+      "Decomposition of the problem",
+      "Identifying problem requirements"
     ]
   },
   {
-    "answer": "Algorithm",
+    "answer": "Psuedocode",
     "clues": [
-      "Step-by-step procedure",
-      "Used in programming",
+      "a design notation using numbered steps in English",
+      "not a graphical design notation",
       "Solves a problem systematically"
     ]
   },
   {
-    "answer": "Database",
+    "answer": "binary",
     "clues": [
-      "Stores information",
-      "Can be queried",
-      "Used for persistent storage"
+      "uses 1 or 0",
+      "base 2 numbering system",
+      "machine code"
     ]
-  }
+  },
+
+
+  {
+    "answer": "hexadecimal",
+    "clues": [
+      
+      "uses 0 to 9 ...",
+      
+      "easier for humans to understand than binary",
+      "and A to F"
+    ]
+  },
+
+  {
+    "answer": "unicode",
+    "clues": [
+      
+      "method of representing text in a computer system",
+      
+      "allows for a greater range of characters than ASCII",
+      "uses 16 bits (and has larger versions also"
+    ]
+  },
+
+  {
+    "answer": "sample rate",
+    "clues": [
+      "how often the amplitude of a wave is measured",
+      "measured in hertz",
+      
+      
+      "sample is converted to binary"
+    ]
+  },
+
+  {
+    "answer": "Run length encoding",
+    "clues": [
+      "does not remove data permanently to reduce file size",
+      "lossless method to represent images",
+      "stores the pixel colour and number of times in a row it appears"
+    ]
+  },
+
+    {
+    "answer": "compression",
+    "clues": [
+      "less bandwidth is required to transmit the file",
+      "less storage space is required. can store more files on the device.",
+      
+      
+      "shorter transmission time as the file size is reduced"
+    ]
+  },
+
+    {
+    "answer": "lossless compression",
+    "clues": [
+      "data permanently removed to reduce the file size",
+      "less bandwidth is required to transmit the file",
+      "less storage space is required. can store more files on the device."
+      
+    ]
+  },
+
+     {
+    "answer": "lossly compression",
+    "clues": [
+      
+      "reducing the resolution or the colour depth",
+      "reducing the sample rate or sample resolution",
+      "data permanently removed to reduce the file size",
+      
+    ]
+  },
+
+     {
+    "answer": "packet",
+    "clues": [
+      
+      "forwarded by routers",
+      "contains the IP address of sender and reciever,
+      "has a header, trailer and payload",
+      
+    ]
+  },
+
+     {
+    "answer": "packet switching",
+    "clues": [
+      
+      "data may arrive out of order",
+      "once the last X has arrived they are reordered",
+      "router sends packets via most efficient route",
+      
+    ]
+  },
+
+    {
+    "answer": "serial",
+    "clues": [
+      
+      "one bit is sent at a time",
+      "over one wire",
+      "less likely to have errors or skew",
+      
+    ]
+  },
+
+  {
+    "answer": "parallel",
+    "clues": [
+      
+      "multiple wires send 1 bit at a time simultaneously",
+      "skew and cross-talk are issues",
+      "high transmission speeds",
+      
+    ]
+  },
+
+    {
+    "answer": "parity check",
+    "clues": [
+      
+      "uses odd or even ......",
+      "method of error detection",
+      "changes the most significant bit",
+      
+    ]
+  },
+
+     {
+    "answer": "parity block",
+    "clues": [
+      
+      "type of check on multiple bytes",
+      "creates a full byte to send with other data",
+      "uses odd or even on each byte and column",
+      
+    ]
+  },
+
+   {
+    "answer": "encryption",
+    "clues": [
+      
+      "ensures data is in a format that cannot be understood",
+      "uses an algorithm and a key",
+      "can only decrypt with the appropriate key",
+      
+    ]
+  },
+
+  
+   {
+    "answer": "asymmetric encryption",
+    "clues": [
+      
+      "ensures data is in a format that cannot be understood",
+      "uses a private key and public key",
+      "can only decrypt with the appropriate key",
+      
+    ]
+  },
+
+    {
+    "answer": "microprocessor",
+    "clues": [
+      
+      "integrated circuit on a single chip",
+      "CU and ALU are components",
+      "processes data and instructions",
+      
+    ]
+  },
+
+    {
+    "answer": "cache",
+    "clues": [
+      
+      "stores the most common instructions",
+      "located physically closer to processor than main memory",
+      "has faster access than RAM",
+      
+    ]
+  },
+
+    {
+    "answer": "instruction set",
+    "clues": [
+      
+      "machine code instructions that ...",
+      "can be processed by the CPU",
+      "RISC and CISC are examples",
+      
+    ]
+  },
+
+   {
+    "answer": "embedded system",
+    "clues": [
+      
+      "performs a specific function",
+      "not general purpose like a computer",
+      "built into larger devices e.g. fridge",
+      
+    ]
+  },
+
+   {
+    "answer": "RAM",
+    "clues": [
+      
+      "temporary primary memory storing ... ",
+      "the current files and instructions being processed",
+      "directly accessed by the CPU",
+      
+    ]
+  },
+
+  {
+    "answer": "ROM",
+    "clues": [
+      
+      "permanent primary memory storing ... ",
+      "non-volatile BIOS",
+      "the firmware",
+      
+    ]
+  },
+
+   {
+    "answer": "virtual memory",
+    "clues": [
+      
+      "uses secondary storage ",
+      "useful when the RAM is full",
+      "uses paging to move data to RAM",
+      
+    ]
+  },
+
+   {
+    "answer": "design",
+    "clues": [
+      
+      "further decomposition",
+      "'plan' a solution to a problem",
+      "use pseudocode, flowcharts or structure diagrams",
+      
+    ]
+  },
+
+  {
+    "answer": "coding",
+    "clues": [
+      
+      "some testing included ... ",
+      "iterative testing ... fool!",
+      "involves writing the code for the problem",
+      
+    ]
+  },
+
+  {
+    "answer": "coding",
+    "clues": [
+      
+      "some testing included ... ",
+      "iterative testing ... fool!",
+      "involves writing the code for the problem",
+      
+    ]
+  },
+
+
+
+
+  
 ]
