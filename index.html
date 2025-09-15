@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word Guess Challenge</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #6a11cb, #2575fc); color: #fff; text-align: center; padding: 20px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+    h1 { font-size: 2.5rem; margin-bottom: 20px; }
+    #clueBox, #wordBox, #livesBox, #scoreBox, #feedback { margin: 10px 0; font-size: 1.2rem; }
+    #clueBox { text-align: left; max-width: 500px; }
+    .clue { opacity: 0; transform: translateY(10px); animation: fadeIn 0.6s ease forwards; margin: 5px 0; padding: 8px 12px; background: rgba(255,255,255,0.15); border-radius: 8px; }
+    @keyframes fadeIn { to { opacity:1; transform:translateY(0); } }
+    #wordBox { font-size: 2rem; letter-spacing: 8px; font-weight: bold; }
+    input[type=text] { padding: 10px; font-size:1.2rem; border-radius:8px; border:none; outline:none; width:250px; text-align:center; }
+    button { padding:10px 20px; font-size:1rem; border:none; border-radius:25px; margin:5px; cursor:pointer; background:#fff; color:#2575fc; font-weight:bold; transition:0.2s; }
+    button:hover { background:#f0f0f0; transform:scale(1.05); }
+    #leaderboard { margin-top:30px; background:rgba(255,255,255,0.1); padding:20px; border-radius:15px; width:300px; }
+    #leaderboard h2 { margin-bottom:15px; }
+    #leaderboardList { list-style:none; padding:0; text-align:left; }
+    #leaderboardList li { margin:5px 0; font-size:1.1rem; }
+    #feedback { font-size:1.3rem; font-weight:bold; }
+  </style>
+</head>
+<body>
+<h1>Word Guess Challenge 🎯</h1>
+<div id="namePrompt">
+  Enter your name: <input type="text" id="playerNameInput" placeholder="Your name">
+  <button id="submitNameBtn">Submit</button>
+</div>
+<div id="gameUI" style="display:none;">
+  <div id="clueBox">Press Start to begin!</div>
+  <div id="wordBox"></div>
+  <div id="livesBox">Lives: 5</div>
+  <input type="text" id="guessInput" placeholder="Type your guess here..." disabled>
+  <button id="submitBtn" disabled>Submit</button>
+  <button id="startBtn">Start Game</button>
+  <button id="playAgainBtn" style="display:none;">Play Again</button>
+  <div id="feedback"></div>
+  <div id="scoreBox">Score: 0</div>
+  <div id="leaderboard">
+    <h2>Leaderboard 🏆</h2>
+    <ul id="leaderboardList"></ul>
+  </div>
+</div>
+<script>
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let words = [];
+let currentWord;
+let clueIndex = 0;
+let score = 0;
+let lives = 5;
+let revealedLetters = [];
+let gameStarted = false;
+let playerName = '';
+
+const namePrompt = document.getElementById('namePrompt');
+const playerNameInput = document.getElementById('playerNameInput');
+const submitNameBtn = document.getElementById('submitNameBtn');
+const gameUI = document.getElementById('gameUI');
+const clueBox = document.getElementById("clueBox");
+const wordBox = document.getElementById("wordBox");
+const livesBox = document.getElementById("livesBox");
+const guessInput = document.getElementById("guessInput");
+const submitBtn = document.getElementById("submitBtn");
+const startBtn = document.getElementById("startBtn");
+const playAgainBtn = document.getElementById("playAgainBtn");
+const scoreBox = document.getElementById("scoreBox");
+const feedback = document.getElementById("feedback");
+const leaderboardList = document.getElementById("leaderboardList");
+
+async function loadWords() {
+  try {
+    const response = await fetch('./words.json');
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    words = await response.json();
+  } catch (e) {
+    clueBox.textContent = 'Error loading words.json. Check file location and format.';
+    console.error(e);
+  }
+}
+
+function pickWord() {
+  if (!words || words.length === 0) return;
+  currentWord = words[Math.floor(Math.random() * words.length)];
+  clueIndex = 0;
+  revealedLetters = Array(currentWord.answer.length).fill(false);
+  displayWordProgress();
+  showClues();
+  feedback.textContent = '';
+  guessInput.value = '';
+  guessInput.maxLength = currentWord.answer.length;
+}
+
+function showClues() {
+  clueBox.innerHTML = '';
+  for (let i = 0; i <= clueIndex; i++) {
+    if (currentWord.clues[i]) {
+      const clueDiv = document.createElement('div');
+      clueDiv.className = 'clue';
+      clueDiv.textContent = `Clue ${i+1}: ${currentWord.clues[i]}`;
+      clueBox.appendChild(clueDiv);
+    }
+  }
+}
+
+function displayWordProgress() {
+  if (!currentWord) return;
+  let display = '';
+  for (let i = 0; i < currentWord.answer.length; i++) {
+    display += revealedLetters[i] ? currentWord.answer[i] + ' ' : '_ ';
+  }
+  wordBox.textContent = display.trim();
+}
+
+function revealRandomLetter() {
+  if (!currentWord) return;
+  const unrevealed = [];
+  for (let i = 0; i < currentWord.answer.length; i++) if (!revealedLetters[i]) unrevealed.push(i);
+  if (unrevealed.length > 0) {
+    const randIndex = unrevealed[Math.floor(Math.random() * unrevealed.length)];
+    revealedLetters[randIndex] = true;
+    displayWordProgress();
+  }
+}
+
+async function submitScore() {
+  if (!playerName) return;
+
+  // Fetch current top 10 scores
+  const snapshot = await db.collection("leaderboard").orderBy("score", "desc").limit(10).get();
+  let scores = snapshot.docs.map(doc => doc.data().score);
+
+  // If current score beats lowest top score or less than 10 entries, add it
+  if (scores.length < 10 || score > Math.min(...scores)) {
+    await db.collection("leaderboard").add({ name: playerName, score: score, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+  }
+  fetchLeaderboard();
+}
+
+async function fetchLeaderboard() {
+  const snapshot = await db.collection("leaderboard").orderBy("score", "desc").limit(10).get();
+  leaderboardList.innerHTML = "";
+  snapshot.forEach((doc, index) => {
+    const entry = doc.data();
+    const li = document.createElement("li");
+    li.textContent = `${index + 1}. ${entry.name} - ${entry.score}`;
+    leaderboardList.appendChild(li);
+  });
+}
+
+function checkGuess() {
+  if (!gameStarted || !currentWord) return;
+  const guess = guessInput.value.trim().toLowerCase();
+  if (!guess) return;
+  if (guess === currentWord.answer.toLowerCase()) {
+    score += 
