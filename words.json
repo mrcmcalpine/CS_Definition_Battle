@@ -1,0 +1,26 @@
+[
+  {
+    "answer": "Analysis",
+    "clues": [
+      "Abstraction of the problem",
+      "Breaking down into components",
+      "Understanding patterns and meaning"
+    ]
+  },
+  {
+    "answer": "Algorithm",
+    "clues": [
+      "Step-by-step procedure",
+      "Used in programming",
+      "Solves a problem systematically"
+    ]
+  },
+  {
+    "answer": "Database",
+    "clues": [
+      "Stores information",
+      "Can be queried",
+      "Used for persistent storage"
+    ]
+  }
+]
