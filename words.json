@@ -215,7 +215,6 @@
       "involves writing the code for the problem"
     ]
   },
-
   {
     "answer": "testing",
     "clues": [
@@ -224,7 +223,6 @@
       "to make sure the program functions correctly"
     ]
   },
-
   {
     "answer": "validation",
     "clues": [
@@ -233,7 +231,6 @@
       "entering a month from 1 to 12 only"
     ]
   },
-
   {
     "answer": "verification",
     "clues": [
@@ -242,7 +239,6 @@
       "that data is the same as the original"
     ]
   },
-
   {
     "answer": "boundary",
     "clues": [
@@ -251,16 +247,6 @@
       "BOU .... "
     ]
   },
-
-   {
-    "answer": "SELECTION",
-    "clues": [
-      "uses IF or CASE",
-      "chooses which step of code to carry out based on conditions",
-      "NOT A TYPE OF LOOP "
-    ]
-  },
-
   {
     "answer": "SELECTION",
     "clues": [
@@ -269,7 +255,6 @@
       "NOT A TYPE OF LOOP "
     ]
   },
-
   {
     "answer": "case",
     "clues": [
@@ -278,7 +263,6 @@
       "best for comparing single values"
     ]
   },
-
   {
     "answer": "if",
     "clues": [
@@ -287,7 +271,6 @@
       "best for comparing a range values"
     ]
   },
-
   {
     "answer": "iteration",
     "clues": [
@@ -296,8 +279,7 @@
       "ITE ...."
     ]
   },
-
- {
+  {
     "answer": "count controlled",
     "clues": [
       "type of iteration that repeats a specific number of times",
@@ -305,37 +287,30 @@
       "ITE ...."
     ]
   },
-   {
+  {
     "answer": "precondition",
     "clues": [
       "USES WHILE --- ENDWHILE",
       "checks the condition before executing the code",
-      
       "code in loop may never be executed"
     ]
   },
-
-  
- {
+  {
     "answer": "postcondition",
     "clues": [
       "USES DO ... LOOPUNTIL",
       "checks the condition after executing the code",
-      
       "code in loop executed at least once!"
     ]
   },
-
   {
     "answer": "DIV",
     "clues": [
       "function to return the whole number from division",
       "uses // in python",
-      
       "I don't have another clue!"
     ]
   },
-
   {
     "answer": "MOD",
     "clues": [
@@ -344,184 +319,142 @@
       "too easy for three clues!"
     ]
   },
-
   {
     "answer": "global",
     "clues": [
       "variable/constant that can be accessed in any part of the program",
       "it's got a passport to visit the 'globe!'",
-      
       "too easy for three clues!!!"
     ]
   },
-
   {
     "answer": "constant",
     "clues": [
       "data cannot be changed whilst the program is running",
       "it's kind of permanent!",
-      
       "this is easy as well!!!!"
     ]
   },
-
   {
     "answer": "function",
     "clues": [
       "subroutine that returns a value",
       "may or may not have parameters",
-      
       "not a procedure ..."
     ]
   },
-
   {
     "answer": "procedure",
     "clues": [
       "subroutine that does not return a value",
       "may or may not have parameters",
-      
       "not a function ..."
     ]
   },
-
-   {
+  {
     "answer": "brute force",
     "clues": [
       "cybersecurity threat where hacker attempts many combinations of passwords",
       "systematically try all combinations of password ",
-      
       "starting with Password1"
     ]
   },
-
   {
     "answer": "data transmission errors",
     "clues": [
       "data loss due to interference",
       "... data gain",
-      
       "data change ..."
     ]
   },
-
-    {
+  {
     "answer": "automatic repeat query",
     "clues": [
-      "establishes that data is recieved without an error",
+      "establishes that data is received without an error",
       "uses positive / negative acknowledgements",
-      
       "and timeout"
     ]
   },
-
   {
     "answer": "echo check",
     "clues": [
-      "data recieved is transmitted back to sender",
-      "compared to ensure that the data sent and recieved are the same",
-      
-      "meaning no erros"
+      "data received is transmitted back to sender",
+      "compared to ensure that the data sent and received are the same",
+      "meaning no errors"
     ]
   },
-
-  
   {
     "answer": "private key",
     "clues": [
       "a different key is used to decrypt a message ",
       "a different key is used to encrypt the message",
-      
       "using asymmetric encryption"
     ]
   },
-
   {
     "answer": "arithmetic logic unit",
     "clues": [
       "carries out mathematical operations",
       "performs comparisons",
-      
       "a unit in the CPU"
     ]
   },
-
   {
     "answer": "memory address register",
     "clues": [
       "is unidirectional",
       "stores the address of the next instruction to be fetched",
-      
       "uses the address bus"
     ]
   },
-
   {
     "answer": "memory data register",
     "clues": [
-      "is biidirectional",
+      "is bidirectional",
       "holds data/instructions fetched from memory",
-      
       "uses the data bus"
     ]
   },
-
-   {
+  {
     "answer": "control bus",
     "clues": [
       "uses control signals to synchronize the operations in the CPU",
       "such as read/write/interrupt",
-      
       "uses the clock also"
     ]
   },
-
-    {
-    "answer": "current instruction register",
-    "clues": [
-      "stores the current instruction being executed",
-      ""
-      "uses the clock also"
-    ]
-  },
-
   {
     "answer": "current instruction register",
     "clues": [
       "stores the current instruction being executed",
-      "a register ... "
-      "storing instructions ..."
+      "uses the clock also"
     ]
   },
-
   {
     "answer": "magnetic storage",
     "clues": [
       "uses platters",
-      "divided into uses tracks and sectors."
-      "reads and writes using eletromagnets"
+      "divided into uses tracks and sectors.",
+      "reads and writes using electromagnets"
     ]
   },
-
-   {
+  {
     "answer": "optical storage",
     "clues": [
       "uses lasers",
-      "creates pits and lands"
+      "creates pits and lands",
       "reflects light into a light sensor"
     ]
   },
-
-   {
+  {
     "answer": "solid state",
     "clues": [
       "flash memory",
-      "uses NAND or NOR technology"
+      "uses NAND or NOR technology",
       "uses transistors for control and floating gates"
     ]
   },
-  
-   {
+  {
     "answer": "cloud storage",
     "clues": [
       "can be accessed remotely via the internet",
@@ -529,7 +462,6 @@
       "unavailable without an internet connection"
     ]
   },
-
   {
     "answer": "MAC",
     "clues": [
@@ -538,7 +470,6 @@
       "written in hexadecimal"
     ]
   },
-
   {
     "answer": "static IP",
     "clues": [
@@ -547,7 +478,6 @@
       "not dynamic ..."
     ]
   },
-
   {
     "answer": "dynamic IP",
     "clues": [
@@ -556,7 +486,6 @@
       "periodically changes, not static ..."
     ]
   },
-
   {
     "answer": "router",
     "clues": [
@@ -565,8 +494,6 @@
       "assigns ip addresses"
     ]
   },
-
-
   {
     "answer": "system software",
     "clues": [
@@ -575,8 +502,6 @@
       "and the operating system"
     ]
   },
-
-
   {
     "answer": "utility software",
     "clues": [
@@ -585,16 +510,6 @@
       "part of system software"
     ]
   },
-
-   {
-    "answer": "application software",
-    "clues": [
-      "software that is run on the OS",
-      "provides the services that the user requires",
-      "such as word processing, presentation, sheets etc"
-    ]
-  },
-
   {
     "answer": "application software",
     "clues": [
@@ -603,7 +518,6 @@
       "such as word processing, presentation, sheets etc"
     ]
   },
-
   {
     "answer": "operating system",
     "clues": [
@@ -612,8 +526,7 @@
       "manages memory and multitasking"
     ]
   },
-
- {
+  {
     "answer": "interrupt",
     "clues": [
       "dividing by zero or two applications accessing the same place in memory",
@@ -621,16 +534,14 @@
       "current process is halted (and stored on stack) and THIS is handled"
     ]
   },
-
   {
     "answer": "high-level language",
     "clues": [
-      "easier to read and write code (machine code and assmebly)",
+      "easier to read and write code (machine code and assembly)",
       "easier to debug than low level",
       "portable (machine independence)"
     ]
   },
-
   {
     "answer": "low-level language",
     "clues": [
@@ -639,8 +550,6 @@
       "written in assembly language or machine code"
     ]
   },
-
-  
   {
     "answer": "compiler",
     "clues": [
@@ -649,7 +558,6 @@
       "translates the entire code at once before executing it"
     ]
   },
-
   {
     "answer": "interpreter",
     "clues": [
@@ -658,8 +566,7 @@
       "translates and executes one line at a time"
     ]
   },
-
-   {
+  {
     "answer": "internet",
     "clues": [
       "a network of networks globally",
@@ -667,7 +574,6 @@
       "physical hardware that provides the WWW"
     ]
   },
-
   {
     "answer": "world wide web",
     "clues": [
@@ -676,9 +582,4 @@
       "physical hardware that provides the WWW"
     ]
   }
-
-
-  
-  
-  
 ]
