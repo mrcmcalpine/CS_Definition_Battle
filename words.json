@@ -214,5 +214,471 @@
       "iterative testing ... fool!",
       "involves writing the code for the problem"
     ]
-  }
+  },
+
+  {
+    "answer": "testing",
+    "clues": [
+      "last stage of program development life cycle",
+      "using test data",
+      "to make sure the program functions correctly"
+    ]
+  },
+
+  {
+    "answer": "validation",
+    "clues": [
+      "ensures data is sensible and allowable",
+      "within reasonable bounds (range check e.g.)",
+      "entering a month from 1 to 12 only"
+    ]
+  },
+
+  {
+    "answer": "verification",
+    "clues": [
+      "visual and double entry check",
+      "checking data is entered accurately",
+      "that data is the same as the original"
+    ]
+  },
+
+  {
+    "answer": "boundary",
+    "clues": [
+      "largest/smallest accepted AND rejected value",
+      "right one the limits and just over ...",
+      "BOU .... "
+    ]
+  },
+
+   {
+    "answer": "SELECTION",
+    "clues": [
+      "uses IF or CASE",
+      "chooses which step of code to carry out based on conditions",
+      "NOT A TYPE OF LOOP "
+    ]
+  },
+
+  {
+    "answer": "SELECTION",
+    "clues": [
+      "uses IF or CASE",
+      "chooses which step of code to carry out based on conditions",
+      "NOT A TYPE OF LOOP "
+    ]
+  },
+
+  {
+    "answer": "case",
+    "clues": [
+      "selection statement which compares a single value",
+      "uses OTHERWISE",
+      "best for comparing single values"
+    ]
+  },
+
+  {
+    "answer": "if",
+    "clues": [
+      "selection statement which can compare mutiple conditions",
+      "USES ELSE",
+      "best for comparing a range values"
+    ]
+  },
+
+  {
+    "answer": "iteration",
+    "clues": [
+      "use of loops",
+      " repetition to repeat code",
+      "ITE ...."
+    ]
+  },
+
+ {
+    "answer": "count controlled",
+    "clues": [
+      "type of iteration that repeats a specific number of times",
+      "uses NEXTFOR",
+      "ITE ...."
+    ]
+  },
+   {
+    "answer": "precondition",
+    "clues": [
+      "USES WHILE --- ENDWHILE",
+      "checks the condition before executing the code",
+      
+      "code in loop may never be executed"
+    ]
+  },
+
+  
+ {
+    "answer": "postcondition",
+    "clues": [
+      "USES DO ... LOOPUNTIL",
+      "checks the condition after executing the code",
+      
+      "code in loop executed at least once!"
+    ]
+  },
+
+  {
+    "answer": "DIV",
+    "clues": [
+      "function to return the whole number from division",
+      "uses // in python",
+      
+      "I don't have another clue!"
+    ]
+  },
+
+  {
+    "answer": "MOD",
+    "clues": [
+      "returns the remainder (quotient) of division",
+      "uses %",
+      "too easy for three clues!"
+    ]
+  },
+
+  {
+    "answer": "global",
+    "clues": [
+      "variable/constant that can be accessed in any part of the program",
+      "it's got a passport to visit the 'globe!'",
+      
+      "too easy for three clues!!!"
+    ]
+  },
+
+  {
+    "answer": "constant",
+    "clues": [
+      "data cannot be changed whilst the program is running",
+      "it's kind of permanent!",
+      
+      "this is easy as well!!!!"
+    ]
+  },
+
+  {
+    "answer": "function",
+    "clues": [
+      "subroutine that returns a value",
+      "may or may not have parameters",
+      
+      "not a procedure ..."
+    ]
+  },
+
+  {
+    "answer": "procedure",
+    "clues": [
+      "subroutine that does not return a value",
+      "may or may not have parameters",
+      
+      "not a function ..."
+    ]
+  },
+
+   {
+    "answer": "brute force",
+    "clues": [
+      "cybersecurity threat where hacker attempts many combinations of passwords",
+      "systematically try all combinations of password ",
+      
+      "starting with Password1"
+    ]
+  },
+
+  {
+    "answer": "data transmission errors",
+    "clues": [
+      "data loss due to interference",
+      "... data gain",
+      
+      "data change ..."
+    ]
+  },
+
+    {
+    "answer": "automatic repeat query",
+    "clues": [
+      "establishes that data is recieved without an error",
+      "uses positive / negative acknowledgements",
+      
+      "and timeout"
+    ]
+  },
+
+  {
+    "answer": "echo check",
+    "clues": [
+      "data recieved is transmitted back to sender",
+      "compared to ensure that the data sent and recieved are the same",
+      
+      "meaning no erros"
+    ]
+  },
+
+  
+  {
+    "answer": "private key",
+    "clues": [
+      "a different key is used to decrypt a message ",
+      "a different key is used to encrypt the message",
+      
+      "using asymmetric encryption"
+    ]
+  },
+
+  {
+    "answer": "arithmetic logic unit",
+    "clues": [
+      "carries out mathematical operations",
+      "performs comparisons",
+      
+      "a unit in the CPU"
+    ]
+  },
+
+  {
+    "answer": "memory address register",
+    "clues": [
+      "is unidirectional",
+      "stores the address of the next instruction to be fetched",
+      
+      "uses the address bus"
+    ]
+  },
+
+  {
+    "answer": "memory data register",
+    "clues": [
+      "is biidirectional",
+      "holds data/instructions fetched from memory",
+      
+      "uses the data bus"
+    ]
+  },
+
+   {
+    "answer": "control bus",
+    "clues": [
+      "uses control signals to synchronize the operations in the CPU",
+      "such as read/write/interrupt",
+      
+      "uses the clock also"
+    ]
+  },
+
+    {
+    "answer": "current instruction register",
+    "clues": [
+      "stores the current instruction being executed",
+      ""
+      "uses the clock also"
+    ]
+  },
+
+  {
+    "answer": "current instruction register",
+    "clues": [
+      "stores the current instruction being executed",
+      "a register ... "
+      "storing instructions ..."
+    ]
+  },
+
+  {
+    "answer": "magnetic storage",
+    "clues": [
+      "uses platters",
+      "divided into uses tracks and sectors."
+      "reads and writes using eletromagnets"
+    ]
+  },
+
+   {
+    "answer": "optical storage",
+    "clues": [
+      "uses lasers",
+      "creates pits and lands"
+      "reflects light into a light sensor"
+    ]
+  },
+
+   {
+    "answer": "solid state",
+    "clues": [
+      "flash memory",
+      "uses NAND or NOR technology"
+      "uses transistors for control and floating gates"
+    ]
+  },
+  
+   {
+    "answer": "cloud storage",
+    "clues": [
+      "can be accessed remotely via the internet",
+      "uses physical servers rather than local storage",
+      "unavailable without an internet connection"
+    ]
+  },
+
+  {
+    "answer": "MAC",
+    "clues": [
+      "unique address of a network interface card",
+      "uses manufacture code and serial code",
+      "written in hexadecimal"
+    ]
+  },
+
+  {
+    "answer": "static IP",
+    "clues": [
+      "does not change each time a device reconnects",
+      "allocated by network ... ",
+      "not dynamic ..."
+    ]
+  },
+
+  {
+    "answer": "dynamic IP",
+    "clues": [
+      "address assigned each time a device reconnects",
+      "assigned by ISP/DHCP/router ",
+      "periodically changes, not static ..."
+    ]
+  },
+
+  {
+    "answer": "router",
+    "clues": [
+      "sends data to a specific destination on a network (using a routing table)",
+      "connects a local network to internet",
+      "assigns ip addresses"
+    ]
+  },
+
+
+  {
+    "answer": "system software",
+    "clues": [
+      "provides the services the computer requires",
+      "utility software ....",
+      "and the operating system"
+    ]
+  },
+
+
+  {
+    "answer": "utility software",
+    "clues": [
+      "software that improves the performance of a computer system",
+      "disk defragmenter, backup, firewall",
+      "part of system software"
+    ]
+  },
+
+   {
+    "answer": "application software",
+    "clues": [
+      "software that is run on the OS",
+      "provides the services that the user requires",
+      "such as word processing, presentation, sheets etc"
+    ]
+  },
+
+  {
+    "answer": "application software",
+    "clues": [
+      "software that is run on the OS",
+      "provides the services that the user requires",
+      "such as word processing, presentation, sheets etc"
+    ]
+  },
+
+  {
+    "answer": "operating system",
+    "clues": [
+      "manages files and handles interrupts",
+      "provides the interface and manages peripherals",
+      "manages memory and multitasking"
+    ]
+  },
+
+ {
+    "answer": "interrupt",
+    "clues": [
+      "dividing by zero or two applications accessing the same place in memory",
+      "pressing a key on a keyboard or moving the mouse",
+      "current process is halted (and stored on stack) and THIS is handled"
+    ]
+  },
+
+  {
+    "answer": "high-level language",
+    "clues": [
+      "easier to read and write code (machine code and assmebly)",
+      "easier to debug than low level",
+      "portable (machine independence)"
+    ]
+  },
+
+  {
+    "answer": "low-level language",
+    "clues": [
+      "can directly manipulate the hardware",
+      "writing code which is more efficient",
+      "written in assembly language or machine code"
+    ]
+  },
+
+  
+  {
+    "answer": "compiler",
+    "clues": [
+      "best when development of program is complete",
+      "produces an exe file and/or list of all errors",
+      "translates the entire code at once before executing it"
+    ]
+  },
+
+  {
+    "answer": "interpreter",
+    "clues": [
+      "best for during development (iterative testing)",
+      "stops execution when an error is found",
+      "translates and executes one line at a time"
+    ]
+  },
+
+   {
+    "answer": "internet",
+    "clues": [
+      "a network of networks globally",
+      "the infrastructure",
+      "physical hardware that provides the WWW"
+    ]
+  },
+
+  {
+    "answer": "world wide web",
+    "clues": [
+      "a network of networks globally",
+      "the infrastructure",
+      "physical hardware that provides the WWW"
+    ]
+  },
+
+
+  
+  
+  
 ]
