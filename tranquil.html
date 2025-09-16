@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tranquil Typing Game 🌿</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #a8edea, #fed6e3);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    #gameArea {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      overflow: hidden;
+    }
+    .clue {
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.2rem;
+      background: rgba(255,255,255,0.7);
+      padding: 6px 12px;
+      border-radius: 12px;
+      color: #333;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: opacity 0.3s ease;
+    }
+    #hud {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 1rem;
+      color: #444;
+    }
+    #inputBox {
+      width: 80%;
+      max-width: 400px;
+      margin: 20px;
+      padding: 12px;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    #gameOver {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255,255,255,0.9);
+      padding: 20px 30px;
+      border-radius: 12px;
+      text-align: center;
+      display: none;
+    }
+    #gameOver h2 {
+      margin: 0 0 10px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div id="hud">Score: <span id="score">0</span> | Lives: <span id="lives">3</span></div>
+  <div id="gameArea"></div>
+  <input id="inputBox" type="text" placeholder="Type answer here..." />
+  <div id="gameOver">
+    <h2>Game Over 🌸</h2>
+    <p>Your score: <span id="finalScore">0</span></p>
+    <button onclick="startGame()">Play Again</button>
+  </div>
+
+  <script>
+    const WORDS_JSON = "./words.json";
+
+    let words = [];
+    let score = 0;
+    let lives = 3;
+    let activeClues = [];
+    let spawnInterval = 4000; // ms
+    let fallSpeed = 1; // pixels per frame
+    let gameRunning = false;
+
+    const gameArea = document.getElementById("gameArea");
+    const inputBox = document.getElementById("inputBox");
+    const scoreEl = document.getElementById("score");
+    const livesEl = document.getElementById("lives");
+    const gameOverEl = document.getElementById("gameOver");
+    const finalScoreEl = document.getElementById("finalScore");
+
+    async function loadWords() {
+      const res = await fetch(WORDS_JSON);
+      words = await res.json();
+    }
+
+    function startGame() {
+      score = 0;
+      lives = 3;
+      spawnInterval = 4000;
+      fallSpeed = 1;
+      activeClues.forEach(c => c.el.remove());
+      activeClues = [];
+      scoreEl.textContent = score;
+      livesEl.textContent = lives;
+      gameOverEl.style.display = "none";
+      gameRunning = true;
+      gameLoop();
+      spawnClue();
+    }
+
+    function spawnClue() {
+      if (!gameRunning) return;
+      const word = words[Math.floor(Math.random() * words.length)];
+      const el = document.createElement("div");
+      el.className = "clue";
+      el.style.left = Math.random() * (window.innerWidth - 150) + "px";
+      el.textContent = word.clues[0];
+      gameArea.appendChild(el);
+      activeClues.push({ el, word, y: -40 });
+
+      setTimeout(spawnClue, spawnInterval);
+    }
+
+    function gameLoop() {
+      if (!gameRunning) return;
+
+      // Move clues
+      activeClues.forEach((c, i) => {
+        c.y += fallSpeed;
+        c.el.style.top = c.y + "px";
+        if (c.y > window.innerHeight - 50) {
+          // Missed
+          gameArea.removeChild(c.el);
+          activeClues.splice(i, 1);
+          lives--;
+          livesEl.textContent = lives;
+          if (lives <= 0) return endGame();
+        }
+      });
+
+      // Speed up as score increases
+      if (score >= 50) { fallSpeed = 2; spawnInterval = 3000; }
+      if (score >= 100) { fallSpeed = 3; spawnInterval = 2000; }
+      if (score >= 200) { fallSpeed = 4; spawnInterval = 1200; }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    function checkInput() {
+      const text = inputBox.value.trim().toLowerCase();
+      if (!text) return;
+      for (let i = 0; i < activeClues.length; i++) {
+        if (text === activeClues[i].word.answer.toLowerCase()) {
+          score += 5;
+          scoreEl.textContent = score;
+          gameArea.removeChild(activeClues[i].el);
+          activeClues.splice(i, 1);
+          inputBox.value = "";
+          return;
+        }
+      }
+    }
+
+    function endGame() {
+      gameRunning = false;
+      finalScoreEl.textContent = score;
+      gameOverEl.style.display = "block";
+    }
+
+    inputBox.addEventListener("input", checkInput);
+
+    loadWords().then(startGame);
+  </script>
+</body>
+</html>
