@@ -577,9 +577,76 @@
   {
     "answer": "world wide web",
     "clues": [
-      "a network of networks globally",
-      "the infrastructure",
-      "physical hardware that provides the WWW"
+      "collection of websites and web pages",
+      "stored on webservers",
+      "accessed via the infrastrcuture"
     ]
-  }
+  },
+
+    {
+    "answer": "web browser",
+    "clues": [
+      "renders and displays html web pages",
+      "has functions like: bookmarks, history and multiple tabs",
+      "stores cookies and provides nagivation tools and address bar"
+    ]
+  },
+
+    {
+    "answer": "session cookie",
+    "clues": [
+      "holds items in a shopping cart",
+      "short term storage for a browsing session (stored in browser memory)",
+      "deleted when browser closes."
+    ]
+  },
+
+   {
+    "answer": "persistent cookie",
+    "clues": [
+      "longer term and stored on user hard drive",
+      "stores user preferences, login details",
+      "removed when the specified data is reached"
+    ]
+  },
+
+     {
+    "answer": "digital currency",
+    "clues": [
+      "currency that only exists electronically",
+      "built on blockchain technology",
+      "a digital ledger or time stamped unalterable records"
+    ]
+  },
+
+  
+     {
+    "answer": "malware",
+    "clues": [
+      "a form of software that damages a computer system",
+      "virus, worm, trojan horse",
+      "cybersecurity threat"
+    ]
+  },
+
+  
+     {
+    "answer": "robot",
+    "clues": [
+      "has a mechanical structure or framework",
+      "has electrical components, sensors and actuators",
+      "uses microprocessors and is programmable"
+    ]
+  },
+
+       {
+    "answer": "artificial intelligence",
+    "clues": [
+      "dealing with the simulation of intelligent behaciours by computers",
+      "collection of data and rules for using the data",
+      "can reason, learn and adapt"
+    ]
+  },
+  
+  
 ]
