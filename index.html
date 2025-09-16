@@ -8,16 +8,12 @@
     body {
       font-family: 'Segoe UI', Tahoma, sans-serif;
       background: linear-gradient(135deg,#6a11cb,#2575fc);
-      color: #fff;
-      text-align: center;
-      padding: 20px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      color: #fff; text-align: center;
+      padding: 20px; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
     }
     h1 { font-size: 2rem; margin-bottom: 16px; }
-    #clueBox,#wordBox,#livesBox,#scoreBox,#feedback,#incorrectWordsBox {
+    #clueBox,#wordBox,#livesBox,#scoreBox,#feedback,#incorrectWordsBox,#historicBox {
       margin: 10px 0; font-size: 1.1rem;
     }
     #wordBox { font-size: 2rem; letter-spacing: 8px; font-weight: bold; }
@@ -37,21 +33,12 @@
     }
     #leaderboardList { list-style: none; padding: 0; text-align: left; }
     .extra-life { animation: popLife 1.5s ease; color: #ffeb3b; font-weight: bold; }
-    @keyframes popLife {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.6); }
-      100% { transform: scale(1); }
-    }
+    @keyframes popLife { 0%{transform:scale(1);}50%{transform:scale(1.6);}100%{transform:scale(1);} }
     .correct-guess { animation: flashGreen 0.8s ease; color: #4caf50; }
-    @keyframes flashGreen {
-      0% { background: transparent; }
-      50% { background: #4caf50; }
-      100% { background: transparent; }
-    }
-    #incorrectWordsBox {
-      background: rgba(0,0,0,0.2);
-      padding: 10px; border-radius: 8px;
-      display: none;
+    @keyframes flashGreen { 0%{background:transparent;}50%{background:#4caf50;}100%{background:transparent;} }
+    #incorrectWordsBox,#historicBox {
+      background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;
+      display: none; text-align: left; max-width: 500px;
     }
   </style>
 </head>
@@ -71,7 +58,6 @@
     <button id="submitBtn" disabled>Submit</button>
 
     <div id="feedback"></div>
-    <div id="extraClues"></div>
     <div id="scoreBox"></div>
 
     <div id="controls">
@@ -81,6 +67,8 @@
     </div>
 
     <div id="incorrectWordsBox"></div>
+    <div id="historicBox"></div>
+    <button id="clearHistoryBtn" style="display:none;">Clear Mistake History</button>
 
     <div id="leaderboard">
       <h3>Leaderboard 🏆</h3>
@@ -89,16 +77,25 @@
   </div>
 
   <script>
-    // Words and clues (embedded JSON)
-    const words = [
-      { "answer": "Analysis", "clues": ["Abstraction of the problem","Breaking down into components","Understanding patterns"] },
-      { "answer": "Algorithm", "clues": ["Step-by-step process","Used in programming","Solves a problem systematically"] },
-      { "answer": "Variable", "clues": ["Stores a value","Can change","Used in equations"] }
-    ];
+    const WORDS_JSON_PATH = './words.json';
 
+    let words = [];
     let currentWord = null, clueIndex = 0, score = 0, lives = 5;
     let revealedLetters = [], gameStarted = false, playerName = '';
     let incorrectWords = [], consecutiveFirstGuessCount = 0, wrongAttemptsOnWord = 0;
+
+    // Load words from JSON file
+    async function loadWords() {
+      try {
+        const res = await fetch(WORDS_JSON_PATH);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        words = await res.json();
+        if (!Array.isArray(words) || words.length === 0) throw new Error('words.json must be non-empty array');
+      } catch (err) {
+        clueBox.textContent = '❌ Error loading words.json — make sure it is in the same folder as this file.';
+        console.error(err);
+      }
+    }
 
     const namePrompt = document.getElementById('namePrompt');
     const playerNameInput = document.getElementById('playerNameInput');
@@ -116,6 +113,8 @@
     const feedback = document.getElementById('feedback');
     const leaderboardList = document.getElementById('leaderboardList');
     const incorrectWordsBox = document.getElementById('incorrectWordsBox');
+    const historicBox = document.getElementById('historicBox');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 
     function pickWord() {
       currentWord = words[Math.floor(Math.random() * words.length)];
@@ -124,14 +123,12 @@
       displayWordProgress(); showClues();
       feedback.textContent = ''; guessInput.value = '';
     }
-
     function displayWordProgress() {
       wordBox.textContent = revealedLetters.map((r,i)=>r?currentWord.answer[i]:"_").join(" ");
     }
-
     function showClues() {
       clueBox.innerHTML = '';
-      for (let i = 0; i <= clueIndex; i++) {
+      for (let i=0;i<=clueIndex;i++) {
         if (currentWord.clues[i]) {
           const div = document.createElement('div');
           div.textContent = `Clue ${i+1}: ${currentWord.clues[i]}`;
@@ -140,6 +137,7 @@
       }
     }
 
+    // Leaderboard
     function saveLeaderboard(name, value) {
       let board = JSON.parse(localStorage.getItem('leaderboard') || '[]');
       board.push({name, score:value});
@@ -150,64 +148,86 @@
       const board = JSON.parse(localStorage.getItem('leaderboard') || '[]');
       leaderboardList.innerHTML = '';
       board.forEach((e,i)=> {
-        const li = document.createElement('li');
-        li.textContent = `${i+1}. ${e.name} - ${e.score}`;
+        const li=document.createElement('li');
+        li.textContent=`${i+1}. ${e.name} - ${e.score}`;
         leaderboardList.appendChild(li);
       });
     }
 
+    // Mistake history
+    function updateWrongHistory(word) {
+      let history = JSON.parse(localStorage.getItem('wrongHistory')||'{}');
+      history[word] = (history[word]||0)+1;
+      localStorage.setItem('wrongHistory', JSON.stringify(history));
+    }
+    function showHistoricWrongWords() {
+      const history = JSON.parse(localStorage.getItem('wrongHistory')||'{}');
+      const entries = Object.entries(history);
+      if (entries.length===0) {
+        historicBox.style.display='none';
+        clearHistoryBtn.style.display='none';
+        return;
+      }
+      historicBox.style.display='block';
+      clearHistoryBtn.style.display='inline-block';
+      historicBox.innerHTML = '<strong>Historic Mistakes:</strong><br>'+
+        entries.map(([w,c])=>`${w} (${c})`).join(', ');
+    }
+    clearHistoryBtn.onclick = () => {
+      localStorage.removeItem('wrongHistory');
+      historicBox.style.display='none';
+      clearHistoryBtn.style.display='none';
+    };
+
     function gameOver() {
       feedback.textContent = `💀 Game Over! The word was: ${currentWord.answer}`;
-      guessInput.disabled = true; submitBtn.disabled = true; playAgainBtn.style.display = 'inline-block';
-      gameStarted = false;
-      showIncorrectWords();
+      guessInput.disabled=true; submitBtn.disabled=true; playAgainBtn.style.display='inline-block';
+      gameStarted=false;
+      showIncorrectWords(); showHistoricWrongWords();
       saveLeaderboard(playerName, score);
       displayLeaderboard();
     }
 
     function showIncorrectWords() {
-      if (incorrectWords.length === 0) {
-        incorrectWordsBox.style.display = 'block';
-        incorrectWordsBox.textContent = 'No incorrect words this run.';
+      if (incorrectWords.length===0) {
+        incorrectWordsBox.style.display='block';
+        incorrectWordsBox.textContent='No incorrect words this run.';
       } else {
-        incorrectWordsBox.style.display = 'block';
-        incorrectWordsBox.innerHTML = '<strong>Incorrect this run:</strong> ' + incorrectWords.join(', ');
+        incorrectWordsBox.style.display='block';
+        incorrectWordsBox.innerHTML='<strong>Incorrect this run:</strong> '+incorrectWords.join(', ');
       }
     }
-    function hideIncorrectWords() { incorrectWordsBox.style.display='none'; }
+    function hideIncorrectWords(){ incorrectWordsBox.style.display='none'; }
 
     function checkGuess() {
       if (!gameStarted) return;
       const guess = guessInput.value.trim();
       if (!guess) return;
-      if (guess.toLowerCase() === currentWord.answer.toLowerCase()) {
-        const points = [5,3,1][clueIndex] || 0;
-        score += points;
-        scoreBox.textContent = `Score: ${score}`;
-        feedback.textContent = `✅ Correct! +${points} points.`;
+      if (guess.toLowerCase()===currentWord.answer.toLowerCase()) {
+        const points=[5,3,1][clueIndex]||0;
+        score+=points; scoreBox.textContent=`Score: ${score}`;
+        feedback.textContent=`✅ Correct! +${points} points.`;
         feedback.classList.add('correct-guess');
         setTimeout(()=>feedback.classList.remove('correct-guess'),800);
-
         if (clueIndex===0) {
           consecutiveFirstGuessCount++;
           if (consecutiveFirstGuessCount>=3) {
-            lives++; livesBox.textContent = `Lives: ${lives}`;
+            lives++; livesBox.textContent=`Lives: ${lives}`;
             livesBox.classList.add('extra-life');
-            feedback.textContent += ' 🎉 Extra life!';
+            feedback.textContent+=' 🎉 Extra life!';
             setTimeout(()=>livesBox.classList.remove('extra-life'),1500);
             consecutiveFirstGuessCount=0;
           }
         } else consecutiveFirstGuessCount=0;
-
         setTimeout(pickWord,1000);
       } else {
-        wrongAttemptsOnWord++; clueIndex++;
-        lives--; livesBox.textContent = `Lives: ${lives}`;
-        feedback.textContent = '❌ Wrong!';
+        wrongAttemptsOnWord++; clueIndex++; lives--; livesBox.textContent=`Lives: ${lives}`;
+        feedback.textContent='❌ Wrong!';
         consecutiveFirstGuessCount=0;
         if (!incorrectWords.includes(currentWord.answer)) incorrectWords.push(currentWord.answer);
+        updateWrongHistory(currentWord.answer);
         if (wrongAttemptsOnWord>=3) {
-          feedback.textContent = `⚠️ Revealed: ${currentWord.answer}`;
+          feedback.textContent=`⚠️ Revealed: ${currentWord.answer}`;
           setTimeout(pickWord,1200);
         } else showClues();
         if (lives<=0) gameOver();
@@ -216,13 +236,16 @@
     }
 
     // Events
-    submitNameBtn.onclick = () => {
-      playerName = playerNameInput.value.trim();
+    submitNameBtn.onclick = async () => {
+      playerName=playerNameInput.value.trim();
       if (!playerName) return alert("Enter your name");
       namePrompt.style.display='none'; gameUI.style.display='block';
-      displayLeaderboard();
+      score=0; lives=5; scoreBox.textContent=`Score:${score}`; livesBox.textContent=`Lives:${lives}`;
+      await loadWords();
+      displayLeaderboard(); showHistoricWrongWords();
     };
-    startBtn.onclick = () => { score=0; lives=5; incorrectWords=[]; hideIncorrectWords();
+    startBtn.onclick = () => {
+      score=0; lives=5; incorrectWords=[]; hideIncorrectWords();
       scoreBox.textContent=`Score:${score}`; livesBox.textContent=`Lives:${lives}`;
       guessInput.disabled=false; submitBtn.disabled=false; playAgainBtn.style.display='none';
       gameStarted=true; startBtn.style.display='none'; resetBtn.style.display='inline-block';
