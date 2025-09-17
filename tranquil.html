@@ -23,18 +23,23 @@
       overflow: hidden;
       z-index: 2;
     }
-    .clue {
+    .clueGroup {
       position: absolute;
-      top: -60px;
-      font-size: 1.9rem;
+      top: -80px;
       background: rgba(255,255,255,0.7);
-      padding: 10px 18px;
+      padding: 12px 18px;
       border-radius: 14px;
       color: #2b2b2b;
       box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-      transition: opacity 0.3s ease;
-      white-space: nowrap;
+      transition: opacity 0.6s ease;
+      min-width: 200px;
     }
+    .clueGroup .clueLine {
+      font-size: 1.6rem;
+      margin: 4px 0;
+    }
+    .clueGroup .hidden { display: none; }
+
     #hud {
       position: absolute;
       top: 10px;
@@ -46,7 +51,7 @@
     #inputBox {
       width: 80%;
       max-width: 450px;
-      margin: 20px;
+      margin: 10px;
       padding: 14px;
       font-size: 1.4rem;
       border-radius: 10px;
@@ -56,6 +61,21 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.25);
       z-index: 3;
     }
+    #pushBackBtn {
+      margin-bottom: 20px;
+      padding: 10px 20px;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      border: none;
+      background: #fff;
+      color: #2575fc;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      z-index: 3;
+    }
+    #pushBackBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
     #gameOver {
       position: absolute;
       top: 40%;
@@ -72,9 +92,12 @@
       margin: 0 0 12px;
       color: #333;
     }
-    .fade-out {
-      opacity: 0;
-      transition: opacity 1.2s ease;
+    .fade-out { opacity: 0; transition: opacity 1s ease; }
+    .reveal-answer {
+      margin-top: 8px;
+      font-size: 1.2rem;
+      color: #444;
+      font-style: italic;
     }
 
     /* 🍃 Leaves */
@@ -95,9 +118,10 @@
   </style>
 </head>
 <body>
-  <div id="hud">Score: <span id="score">0</span> | Lives: <span id="lives">3</span></div>
+  <div id="hud">Score: <span id="score">0</span> | Lives: <span id="lives">3</span> | PushBacks: <span id="pushBacks">3</span></div>
   <div id="gameArea"></div>
   <input id="inputBox" type="text" placeholder="Type answer here..." />
+  <button id="pushBackBtn">Push Back 🌊</button>
   <div id="gameOver">
     <h2>Game Over 🌸</h2>
     <p>Your score: <span id="finalScore">0</span></p>
@@ -110,15 +134,19 @@
     let words = [];
     let score = 0;
     let lives = 3;
+    let pushBacks = 3;
     let activeWords = [];
     let spawnInterval = 6000;
     let fallSpeed = 0.5;
     let gameRunning = false;
+    let correctCount = 0;
 
     const gameArea = document.getElementById("gameArea");
     const inputBox = document.getElementById("inputBox");
     const scoreEl = document.getElementById("score");
     const livesEl = document.getElementById("lives");
+    const pushBacksEl = document.getElementById("pushBacks");
+    const pushBackBtn = document.getElementById("pushBackBtn");
     const gameOverEl = document.getElementById("gameOver");
     const finalScoreEl = document.getElementById("finalScore");
 
@@ -130,12 +158,16 @@
     function startGame() {
       score = 0;
       lives = 3;
+      pushBacks = 3;
+      correctCount = 0;
       spawnInterval = 6000;
       fallSpeed = 0.5;
-      activeWords.forEach(w => w.clues.forEach(c => c.el.remove()));
+      activeWords.forEach(w => w.el.remove());
       activeWords = [];
       scoreEl.textContent = score;
       livesEl.textContent = lives;
+      pushBacksEl.textContent = pushBacks;
+      pushBackBtn.disabled = false;
       gameOverEl.style.display = "none";
       gameRunning = true;
       gameLoop();
@@ -145,20 +177,27 @@
     function spawnWord() {
       if (!gameRunning) return;
       const word = words[Math.floor(Math.random() * words.length)];
-      const x = Math.random() * (window.innerWidth - 300);
 
-      const clueEls = [];
+      // Prevent overlap: try new x until it's far enough
+      let x, safe;
+      do {
+        x = Math.random() * (window.innerWidth - 300);
+        safe = activeWords.every(w => Math.abs(parseFloat(w.el.style.left) - x) > 220);
+      } while (!safe);
+
+      const el = document.createElement("div");
+      el.className = "clueGroup";
+      el.style.left = x + "px";
+
       word.clues.forEach((clue, idx) => {
-        const el = document.createElement("div");
-        el.className = "clue";
-        el.style.left = x + "px";
-        el.textContent = clue;
-        gameArea.appendChild(el);
-        clueEls.push({ el, idx, y: -60, visible: idx === 0 });
-        if (idx > 0) el.style.display = "none";
+        const line = document.createElement("div");
+        line.className = "clueLine" + (idx > 0 ? " hidden" : "");
+        line.textContent = clue;
+        el.appendChild(line);
       });
 
-      activeWords.push({ answer: word.answer, clues: clueEls });
+      gameArea.appendChild(el);
+      activeWords.push({ answer: word.answer, el, y: -80, revealed: [true, false, false] });
 
       setTimeout(spawnWord, spawnInterval);
     }
@@ -166,29 +205,32 @@
     function gameLoop() {
       if (!gameRunning) return;
 
-      activeWords.forEach((wordObj, wi) => {
-        wordObj.clues.forEach((c, ci) => {
-          if (!c.visible) return;
-          c.y += fallSpeed;
-          c.el.style.top = c.y + "px";
+      activeWords.forEach((w, i) => {
+        w.y += fallSpeed;
+        w.el.style.top = w.y + "px";
 
-          if (ci === 0 && c.y > window.innerHeight / 3 && wordObj.clues[1]) {
-            wordObj.clues[1].visible = true;
-            wordObj.clues[1].el.style.display = "block";
-          }
-          if (ci === 1 && c.y > window.innerHeight / 2 && wordObj.clues[2]) {
-            wordObj.clues[2].visible = true;
-            wordObj.clues[2].el.style.display = "block";
-          }
+        const lines = w.el.querySelectorAll(".clueLine");
+        if (w.y > window.innerHeight / 3 && !w.revealed[1] && lines[1]) {
+          lines[1].classList.remove("hidden");
+          w.revealed[1] = true;
+        }
+        if (w.y > window.innerHeight / 2 && !w.revealed[2] && lines[2]) {
+          lines[2].classList.remove("hidden");
+          w.revealed[2] = true;
+        }
 
-          if (c.y > window.innerHeight - 60) {
-            gameArea.removeChild(c.el);
-            wordObj.clues.splice(ci, 1);
-            lives--;
-            livesEl.textContent = lives;
-            if (lives <= 0) endGame();
-          }
-        });
+        if (w.y > window.innerHeight - 80) {
+          const ans = document.createElement("div");
+          ans.className = "reveal-answer";
+          ans.textContent = `Answer: ${w.answer}`;
+          w.el.appendChild(ans);
+
+          setTimeout(() => { if (w.el.parentNode) gameArea.removeChild(w.el); }, 1500);
+          activeWords.splice(i, 1);
+          lives--;
+          livesEl.textContent = lives;
+          if (lives <= 0) endGame();
+        }
       });
 
       if (score >= 30) { fallSpeed = 0.8; spawnInterval = 5000; }
@@ -208,15 +250,20 @@
       for (let i = 0; i < activeWords.length; i++) {
         if (normalize(text) === normalize(activeWords[i].answer)) {
           score += 5;
+          correctCount++;
           scoreEl.textContent = score;
 
-          activeWords[i].clues.forEach(c => {
-            c.el.classList.add("fade-out");
-            setTimeout(() => { if (c.el.parentNode) gameArea.removeChild(c.el); }, 1200);
-          });
-
+          activeWords[i].el.classList.add("fade-out");
+          setTimeout(() => { if (activeWords[i].el.parentNode) gameArea.removeChild(activeWords[i].el); }, 1000);
           activeWords.splice(i, 1);
           inputBox.value = "";
+
+          // Award extra pushback every 5 correct
+          if (correctCount % 5 === 0) {
+            pushBacks++;
+            pushBacksEl.textContent = pushBacks;
+            pushBackBtn.disabled = false;
+          }
           return;
         }
       }
@@ -228,7 +275,19 @@
       gameOverEl.style.display = "block";
     }
 
+    function pushBack() {
+      if (pushBacks <= 0) return;
+      pushBacks--;
+      pushBacksEl.textContent = pushBacks;
+      if (pushBacks <= 0) pushBackBtn.disabled = true;
+
+      activeWords.forEach(w => {
+        w.y = Math.max(w.y - window.innerHeight / 2, -80);
+      });
+    }
+
     inputBox.addEventListener("input", checkInput);
+    pushBackBtn.addEventListener("click", pushBack);
 
     // 🍃 Gentle leaf drift
     function spawnLeaf() {
@@ -238,7 +297,6 @@
       const duration = 10 + Math.random() * 10;
       leaf.style.animationDuration = duration + "s";
       document.body.appendChild(leaf);
-
       setTimeout(() => leaf.remove(), duration * 1000);
       setTimeout(spawnLeaf, 1500);
     }
