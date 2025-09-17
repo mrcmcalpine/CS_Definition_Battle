@@ -8,7 +8,7 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #a8edea, #fed6e3);
+      background: linear-gradient(135deg, #d4fc79, #96e6a1);
       overflow: hidden;
       height: 100vh;
       display: flex;
@@ -21,38 +21,40 @@
       flex: 1;
       width: 100%;
       overflow: hidden;
+      z-index: 2;
     }
     .clue {
       position: absolute;
-      top: -40px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 1.2rem;
+      top: -60px;
+      font-size: 1.9rem;
       background: rgba(255,255,255,0.7);
-      padding: 6px 12px;
-      border-radius: 12px;
-      color: #333;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      padding: 10px 18px;
+      border-radius: 14px;
+      color: #2b2b2b;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
       transition: opacity 0.3s ease;
+      white-space: nowrap;
     }
     #hud {
       position: absolute;
       top: 10px;
       left: 10px;
-      font-size: 1rem;
-      color: #444;
+      font-size: 1.2rem;
+      color: #333;
+      z-index: 3;
     }
     #inputBox {
       width: 80%;
-      max-width: 400px;
+      max-width: 450px;
       margin: 20px;
-      padding: 12px;
-      font-size: 1.2rem;
-      border-radius: 8px;
+      padding: 14px;
+      font-size: 1.4rem;
+      border-radius: 10px;
       border: none;
       outline: none;
       text-align: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      z-index: 3;
     }
     #gameOver {
       position: absolute;
@@ -60,14 +62,35 @@
       left: 50%;
       transform: translate(-50%, -50%);
       background: rgba(255,255,255,0.9);
-      padding: 20px 30px;
-      border-radius: 12px;
+      padding: 24px 34px;
+      border-radius: 14px;
       text-align: center;
       display: none;
+      z-index: 4;
     }
     #gameOver h2 {
-      margin: 0 0 10px;
+      margin: 0 0 12px;
       color: #333;
+    }
+    .fade-out {
+      opacity: 0;
+      transition: opacity 1.2s ease;
+    }
+
+    /* 🍃 Leaves */
+    .leaf {
+      position: absolute;
+      top: -50px;
+      width: 30px;
+      height: 30px;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/5/57/Leaf_icon_01.svg') no-repeat center/contain;
+      opacity: 0.6;
+      z-index: 1;
+      animation: drift linear forwards;
+    }
+    @keyframes drift {
+      from { transform: translateY(-50px) rotate(0deg); }
+      to { transform: translateY(110vh) rotate(360deg); }
     }
   </style>
 </head>
@@ -87,9 +110,9 @@
     let words = [];
     let score = 0;
     let lives = 3;
-    let activeClues = [];
-    let spawnInterval = 4000; // ms
-    let fallSpeed = 1; // pixels per frame
+    let activeWords = [];
+    let spawnInterval = 6000;
+    let fallSpeed = 0.5;
     let gameRunning = false;
 
     const gameArea = document.getElementById("gameArea");
@@ -107,65 +130,92 @@
     function startGame() {
       score = 0;
       lives = 3;
-      spawnInterval = 4000;
-      fallSpeed = 1;
-      activeClues.forEach(c => c.el.remove());
-      activeClues = [];
+      spawnInterval = 6000;
+      fallSpeed = 0.5;
+      activeWords.forEach(w => w.clues.forEach(c => c.el.remove()));
+      activeWords = [];
       scoreEl.textContent = score;
       livesEl.textContent = lives;
       gameOverEl.style.display = "none";
       gameRunning = true;
       gameLoop();
-      spawnClue();
+      spawnWord();
     }
 
-    function spawnClue() {
+    function spawnWord() {
       if (!gameRunning) return;
       const word = words[Math.floor(Math.random() * words.length)];
-      const el = document.createElement("div");
-      el.className = "clue";
-      el.style.left = Math.random() * (window.innerWidth - 150) + "px";
-      el.textContent = word.clues[0];
-      gameArea.appendChild(el);
-      activeClues.push({ el, word, y: -40 });
+      const x = Math.random() * (window.innerWidth - 300);
 
-      setTimeout(spawnClue, spawnInterval);
+      const clueEls = [];
+      word.clues.forEach((clue, idx) => {
+        const el = document.createElement("div");
+        el.className = "clue";
+        el.style.left = x + "px";
+        el.textContent = clue;
+        gameArea.appendChild(el);
+        clueEls.push({ el, idx, y: -60, visible: idx === 0 });
+        if (idx > 0) el.style.display = "none";
+      });
+
+      activeWords.push({ answer: word.answer, clues: clueEls });
+
+      setTimeout(spawnWord, spawnInterval);
     }
 
     function gameLoop() {
       if (!gameRunning) return;
 
-      // Move clues
-      activeClues.forEach((c, i) => {
-        c.y += fallSpeed;
-        c.el.style.top = c.y + "px";
-        if (c.y > window.innerHeight - 50) {
-          // Missed
-          gameArea.removeChild(c.el);
-          activeClues.splice(i, 1);
-          lives--;
-          livesEl.textContent = lives;
-          if (lives <= 0) return endGame();
-        }
+      activeWords.forEach((wordObj, wi) => {
+        wordObj.clues.forEach((c, ci) => {
+          if (!c.visible) return;
+          c.y += fallSpeed;
+          c.el.style.top = c.y + "px";
+
+          if (ci === 0 && c.y > window.innerHeight / 3 && wordObj.clues[1]) {
+            wordObj.clues[1].visible = true;
+            wordObj.clues[1].el.style.display = "block";
+          }
+          if (ci === 1 && c.y > window.innerHeight / 2 && wordObj.clues[2]) {
+            wordObj.clues[2].visible = true;
+            wordObj.clues[2].el.style.display = "block";
+          }
+
+          if (c.y > window.innerHeight - 60) {
+            gameArea.removeChild(c.el);
+            wordObj.clues.splice(ci, 1);
+            lives--;
+            livesEl.textContent = lives;
+            if (lives <= 0) endGame();
+          }
+        });
       });
 
-      // Speed up as score increases
-      if (score >= 50) { fallSpeed = 2; spawnInterval = 3000; }
-      if (score >= 100) { fallSpeed = 3; spawnInterval = 2000; }
-      if (score >= 200) { fallSpeed = 4; spawnInterval = 1200; }
+      if (score >= 30) { fallSpeed = 0.8; spawnInterval = 5000; }
+      if (score >= 80) { fallSpeed = 1.2; spawnInterval = 4000; }
+      if (score >= 150) { fallSpeed = 1.8; spawnInterval = 3000; }
 
       requestAnimationFrame(gameLoop);
     }
 
+    function normalize(text) {
+      return text.toLowerCase().replace(/[^a-z0-9]/gi, '');
+    }
+
     function checkInput() {
-      const text = inputBox.value.trim().toLowerCase();
+      const text = inputBox.value.trim();
       if (!text) return;
-      for (let i = 0; i < activeClues.length; i++) {
-        if (text === activeClues[i].word.answer.toLowerCase()) {
+      for (let i = 0; i < activeWords.length; i++) {
+        if (normalize(text) === normalize(activeWords[i].answer)) {
           score += 5;
           scoreEl.textContent = score;
-          gameArea.removeChild(activeClues[i].el);
-          activeClues.splice(i, 1);
+
+          activeWords[i].clues.forEach(c => {
+            c.el.classList.add("fade-out");
+            setTimeout(() => { if (c.el.parentNode) gameArea.removeChild(c.el); }, 1200);
+          });
+
+          activeWords.splice(i, 1);
           inputBox.value = "";
           return;
         }
@@ -180,7 +230,21 @@
 
     inputBox.addEventListener("input", checkInput);
 
+    // 🍃 Gentle leaf drift
+    function spawnLeaf() {
+      const leaf = document.createElement("div");
+      leaf.className = "leaf";
+      leaf.style.left = Math.random() * window.innerWidth + "px";
+      const duration = 10 + Math.random() * 10;
+      leaf.style.animationDuration = duration + "s";
+      document.body.appendChild(leaf);
+
+      setTimeout(() => leaf.remove(), duration * 1000);
+      setTimeout(spawnLeaf, 1500);
+    }
+
     loadWords().then(startGame);
+    spawnLeaf();
   </script>
 </body>
 </html>
