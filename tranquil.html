@@ -32,10 +32,10 @@
       color: #2b2b2b;
       box-shadow: 0 3px 10px rgba(0,0,0,0.2);
       transition: opacity 0.6s ease;
-      min-width: 200px;
+      min-width: 220px;
     }
     .clueGroup .clueLine {
-      font-size: 1.6rem;
+      font-size: 1.7rem;
       margin: 4px 0;
     }
     .clueGroup .hidden { display: none; }
@@ -78,19 +78,29 @@
 
     #gameOver {
       position: absolute;
-      top: 40%;
+      top: 35%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(255,255,255,0.9);
-      padding: 24px 34px;
+      background: rgba(255,255,255,0.95);
+      padding: 28px 40px;
       border-radius: 14px;
       text-align: center;
       display: none;
       z-index: 4;
+      font-size: 1.5rem;
+      max-width: 600px;
     }
     #gameOver h2 {
-      margin: 0 0 12px;
+      margin: 0 0 18px;
       color: #333;
+      font-size: 2rem;
+    }
+    #missedList {
+      text-align: left;
+      margin-top: 14px;
+      font-size: 1.2rem;
+      max-height: 200px;
+      overflow-y: auto;
     }
     .fade-out { opacity: 0; transition: opacity 1s ease; }
     .reveal-answer {
@@ -115,6 +125,27 @@
       from { transform: translateY(-50px) rotate(0deg); }
       to { transform: translateY(110vh) rotate(360deg); }
     }
+
+    /* 🌊 Push Back Wave Overlay */
+    #wave {
+      position: absolute;
+      bottom: -100%;
+      left: 0;
+      width: 100%;
+      height: 120%;
+      background: radial-gradient(circle at 50% 100%, rgba(173,216,230,0.7), transparent 70%);
+      z-index: 5;
+      pointer-events: none;
+      opacity: 0;
+    }
+    #wave.animate {
+      animation: wavePush 1.5s ease-out forwards;
+    }
+    @keyframes wavePush {
+      0%   { bottom: -100%; opacity: 0.8; }
+      50%  { bottom: 20%; opacity: 0.6; }
+      100% { bottom: 120%; opacity: 0; }
+    }
   </style>
 </head>
 <body>
@@ -125,8 +156,11 @@
   <div id="gameOver">
     <h2>Game Over 🌸</h2>
     <p>Your score: <span id="finalScore">0</span></p>
+    <div id="missedList"></div>
     <button onclick="startGame()">Play Again</button>
   </div>
+  <div id="wave"></div>
+  <audio id="waveSound" src="https://www.soundjay.com/nature/ocean-wave-2.mp3" preload="auto"></audio>
 
   <script>
     const WORDS_JSON = "./words.json";
@@ -140,6 +174,7 @@
     let fallSpeed = 0.5;
     let gameRunning = false;
     let correctCount = 0;
+    let missed = [];
 
     const gameArea = document.getElementById("gameArea");
     const inputBox = document.getElementById("inputBox");
@@ -149,6 +184,9 @@
     const pushBackBtn = document.getElementById("pushBackBtn");
     const gameOverEl = document.getElementById("gameOver");
     const finalScoreEl = document.getElementById("finalScore");
+    const missedListEl = document.getElementById("missedList");
+    const waveEl = document.getElementById("wave");
+    const waveSound = document.getElementById("waveSound");
 
     async function loadWords() {
       const res = await fetch(WORDS_JSON);
@@ -162,6 +200,7 @@
       correctCount = 0;
       spawnInterval = 6000;
       fallSpeed = 0.5;
+      missed = [];
       activeWords.forEach(w => w.el.remove());
       activeWords = [];
       scoreEl.textContent = score;
@@ -175,10 +214,12 @@
     }
 
     function spawnWord() {
-      if (!gameRunning) return;
+      if (!gameRunning || activeWords.length >= 5) {
+        setTimeout(spawnWord, spawnInterval);
+        return;
+      }
       const word = words[Math.floor(Math.random() * words.length)];
 
-      // Prevent overlap: try new x until it's far enough
       let x, safe;
       do {
         x = Math.random() * (window.innerWidth - 300);
@@ -197,7 +238,7 @@
       });
 
       gameArea.appendChild(el);
-      activeWords.push({ answer: word.answer, el, y: -80, revealed: [true, false, false] });
+      activeWords.push({ answer: word.answer, clues: word.clues, el, y: -80, revealed: [true, false, false] });
 
       setTimeout(spawnWord, spawnInterval);
     }
@@ -220,11 +261,13 @@
         }
 
         if (w.y > window.innerHeight - 80) {
-          const ans = document.createElement("div");
-          ans.className = "reveal-answer";
-          ans.textContent = `Answer: ${w.answer}`;
-          w.el.appendChild(ans);
-
+          if (!w.el.querySelector(".reveal-answer")) {
+            const ans = document.createElement("div");
+            ans.className = "reveal-answer";
+            ans.textContent = `Answer: ${w.answer}`;
+            w.el.appendChild(ans);
+            missed.push({ answer: w.answer, clues: w.clues });
+          }
           setTimeout(() => { if (w.el.parentNode) gameArea.removeChild(w.el); }, 1500);
           activeWords.splice(i, 1);
           lives--;
@@ -258,7 +301,6 @@
           activeWords.splice(i, 1);
           inputBox.value = "";
 
-          // Award extra pushback every 5 correct
           if (correctCount % 5 === 0) {
             pushBacks++;
             pushBacksEl.textContent = pushBacks;
@@ -272,6 +314,8 @@
     function endGame() {
       gameRunning = false;
       finalScoreEl.textContent = score;
+      missedListEl.innerHTML = "<strong>Missed Words:</strong><br>" +
+        (missed.length ? missed.map(m => `<div>❌ ${m.answer} — Clues: ${m.clues.join(", ")}</div>`).join("") : "None");
       gameOverEl.style.display = "block";
     }
 
@@ -281,6 +325,11 @@
       pushBacksEl.textContent = pushBacks;
       if (pushBacks <= 0) pushBackBtn.disabled = true;
 
+      waveEl.classList.add("animate");
+      waveSound.currentTime = 0;
+      waveSound.play();
+      setTimeout(() => waveEl.classList.remove("animate"), 1500);
+
       activeWords.forEach(w => {
         w.y = Math.max(w.y - window.innerHeight / 2, -80);
       });
@@ -289,7 +338,6 @@
     inputBox.addEventListener("input", checkInput);
     pushBackBtn.addEventListener("click", pushBack);
 
-    // 🍃 Gentle leaf drift
     function spawnLeaf() {
       const leaf = document.createElement("div");
       leaf.className = "leaf";
