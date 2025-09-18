@@ -160,7 +160,11 @@
     <button onclick="startGame()">Play Again</button>
   </div>
   <div id="wave"></div>
+
+  <!-- 🌊 Sound Effects -->
   <audio id="waveSound" src="https://www.soundjay.com/nature/ocean-wave-2.mp3" preload="auto"></audio>
+  <!-- 🎶 Ambient background -->
+  <audio id="ambient" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" preload="auto" loop></audio>
 
   <script>
     const WORDS_JSON = "./words.json";
@@ -187,6 +191,7 @@
     const missedListEl = document.getElementById("missedList");
     const waveEl = document.getElementById("wave");
     const waveSound = document.getElementById("waveSound");
+    const ambient = document.getElementById("ambient");
 
     async function loadWords() {
       const res = await fetch(WORDS_JSON);
@@ -209,6 +214,8 @@
       pushBackBtn.disabled = false;
       gameOverEl.style.display = "none";
       gameRunning = true;
+      ambient.volume = 0.2;
+      ambient.play().catch(() => {}); // browsers block autoplay until user interaction
       gameLoop();
       spawnWord();
     }
@@ -317,6 +324,7 @@
       missedListEl.innerHTML = "<strong>Missed Words:</strong><br>" +
         (missed.length ? missed.map(m => `<div>❌ ${m.answer} — Clues: ${m.clues.join(", ")}</div>`).join("") : "None");
       gameOverEl.style.display = "block";
+      ambient.pause();
     }
 
     function pushBack() {
