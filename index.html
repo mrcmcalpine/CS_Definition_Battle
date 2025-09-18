@@ -199,7 +199,45 @@
     }
     function hideIncorrectWords(){ incorrectWordsBox.style.display='none'; }
 
-    function checkGuess() {
+    function normalize(text) {
+  return text.toLowerCase().replace(/[^a-z0-9]/gi, '');
+}
+
+function checkGuess() {
+  if (!gameStarted || !currentWord) return;
+  const guess = normalize(guessInput.value.trim());
+  const answer = normalize(currentWord.answer);
+
+  if (!guess) return;
+
+  if (guess === answer) {
+    // ✅ correct guess logic
+    const points = getPointsForClueIndex(clueIndex);
+    score += points;
+    scoreBox.textContent = `Score: ${score}`;
+    feedback.textContent = `✅ Correct! +${points} points.`;
+    // reset, pick new word, etc...
+  } else {
+    // ❌ wrong guess logic
+    clueIndex++;
+    lives--;
+    livesBox.textContent = `Lives: ${lives}`;
+    feedback.textContent = '❌ Wrong!';
+    if (!incorrectWords.includes(currentWord.answer)) incorrectWords.push(currentWord.answer);
+
+    if (clueIndex >= 3) {
+      feedback.textContent = `The word was: ${currentWord.answer}`;
+      pickWord();
+    } else if (lives <= 0) {
+      // game over logic
+    } else {
+      showClues();
+    }
+  }
+  guessInput.value = '';
+}
+
+    /*function checkGuess() {
       if (!gameStarted) return;
       const guess = guessInput.value.trim();
       if (!guess) return;
@@ -233,7 +271,7 @@
         if (lives<=0) gameOver();
       }
       guessInput.value='';
-    }
+    }*/
 
     // Events
     submitNameBtn.onclick = async () => {
