@@ -123,7 +123,7 @@
       displayWordProgress(); showClues();
       feedback.textContent = ''; guessInput.value = '';
     }
-    function displayWordProgress() {
+    /*function displayWordProgress() {
       wordBox.textContent = revealedLetters.map((r,i)=>r?currentWord.answer[i]:"_").join(" ");
     }
     function showClues() {
@@ -135,7 +135,24 @@
           clueBox.appendChild(div);
         }
       }
+    }*/
+
+    function displayWordProgress() {
+  if (!currentWord) return;
+  let display = '';
+  for (let i = 0; i < currentWord.answer.length; i++) {
+    const char = currentWord.answer[i];
+    if (/[^a-zA-Z0-9]/.test(char)) {
+      // Always reveal spaces and special characters
+      display += char + ' ';
+    } else {
+      // Only reveal letters/numbers if marked true
+      display += revealedLetters[i] ? char + ' ' : '_ ';
     }
+  }
+  wordBox.textContent = display.trim();
+}
+
 
     // Leaderboard
     function saveLeaderboard(name, value) {
