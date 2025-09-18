@@ -1,364 +1,242 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tranquil Typing Game 🌿</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #d4fc79, #96e6a1);
-      overflow: hidden;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-end;
-    }
-    #gameArea {
-      position: relative;
-      flex: 1;
-      width: 100%;
-      overflow: hidden;
-      z-index: 2;
-    }
-    .clueGroup {
-      position: absolute;
-      top: -80px;
-      background: rgba(255,255,255,0.7);
-      padding: 12px 18px;
-      border-radius: 14px;
-      color: #2b2b2b;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-      transition: opacity 0.6s ease;
-      min-width: 220px;
-    }
-    .clueGroup .clueLine {
-      font-size: 1.7rem;
-      margin: 4px 0;
-    }
-    .clueGroup .hidden { display: none; }
-
-    #hud {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      font-size: 1.2rem;
-      color: #333;
-      z-index: 3;
-    }
-    #inputBox {
-      width: 80%;
-      max-width: 450px;
-      margin: 10px;
-      padding: 14px;
-      font-size: 1.4rem;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-      text-align: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-      z-index: 3;
-    }
-    #pushBackBtn {
-      margin-bottom: 20px;
-      padding: 10px 20px;
-      font-size: 1.1rem;
-      border-radius: 8px;
-      border: none;
-      background: #fff;
-      color: #2575fc;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-      z-index: 3;
-    }
-    #pushBackBtn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    #gameOver {
-      position: absolute;
-      top: 35%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(255,255,255,0.95);
-      padding: 28px 40px;
-      border-radius: 14px;
-      text-align: center;
-      display: none;
-      z-index: 4;
-      font-size: 1.5rem;
-      max-width: 600px;
-    }
-    #gameOver h2 {
-      margin: 0 0 18px;
-      color: #333;
-      font-size: 2rem;
-    }
-    #missedList {
-      text-align: left;
-      margin-top: 14px;
-      font-size: 1.2rem;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-    .fade-out { opacity: 0; transition: opacity 1s ease; }
-    .reveal-answer {
-      margin-top: 8px;
-      font-size: 1.2rem;
-      color: #444;
-      font-style: italic;
-    }
-
-    /* 🍃 Leaves */
-    .leaf {
-      position: absolute;
-      top: -50px;
-      width: 30px;
-      height: 30px;
-      background: url('https://upload.wikimedia.org/wikipedia/commons/5/57/Leaf_icon_01.svg') no-repeat center/contain;
-      opacity: 0.6;
-      z-index: 1;
-      animation: drift linear forwards;
-    }
-    @keyframes drift {
-      from { transform: translateY(-50px) rotate(0deg); }
-      to { transform: translateY(110vh) rotate(360deg); }
-    }
-
-    /* 🌊 Push Back Wave Overlay */
-    #wave {
-      position: absolute;
-      bottom: -100%;
-      left: 0;
-      width: 100%;
-      height: 120%;
-      background: radial-gradient(circle at 50% 100%, rgba(173,216,230,0.7), transparent 70%);
-      z-index: 5;
-      pointer-events: none;
-      opacity: 0;
-    }
-    #wave.animate {
-      animation: wavePush 1.5s ease-out forwards;
-    }
-    @keyframes wavePush {
-      0%   { bottom: -100%; opacity: 0.8; }
-      50%  { bottom: 20%; opacity: 0.6; }
-      100% { bottom: 120%; opacity: 0; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tranquil Typing Game</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(#a8edea, #fed6e3);
+    overflow: hidden;
+    color: #333;
+  }
+  canvas {
+    position: absolute;
+    top: 0; left: 0;
+  }
+  #ui {
+    position: absolute;
+    top: 10px; left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 10;
+  }
+  #inputBox {
+    margin-top: 10px;
+  }
+  input {
+    padding: 10px;
+    font-size: 1.2rem;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    text-align: center;
+  }
+  button {
+    padding: 8px 14px;
+    margin: 4px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    background: #fff;
+    color: #333;
+    font-weight: bold;
+  }
+  #gameOver {
+    display: none;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255,255,255,0.9);
+    padding: 20px;
+    border-radius: 16px;
+    text-align: center;
+    font-size: 1.5rem;
+    max-width: 600px;
+  }
+  .highlight {
+    color: #ff9900;
+    text-shadow: 0 0 8px #ffcc00;
+  }
+</style>
 </head>
 <body>
-  <div id="hud">Score: <span id="score">0</span> | Lives: <span id="lives">3</span> | PushBacks: <span id="pushBacks">3</span></div>
-  <div id="gameArea"></div>
-  <input id="inputBox" type="text" placeholder="Type answer here..." />
-  <button id="pushBackBtn">Push Back 🌊</button>
-  <div id="gameOver">
-    <h2>Game Over 🌸</h2>
-    <p>Your score: <span id="finalScore">0</span></p>
-    <div id="missedList"></div>
-    <button onclick="startGame()">Play Again</button>
+  <canvas id="bg"></canvas>
+  <div id="ui">
+    <div>Score: <span id="score">0</span> | Lives: <span id="lives">5</span></div>
+    <div>Pushbacks: <span id="pushbacks">3</span> | Trims: <span id="trims">2</span></div>
+    <div id="inputBox">
+      <input id="guess" placeholder="Type your answer..." />
+      <div>
+        <button id="pushbackBtn">Pushback</button>
+        <button id="trimBtn">Trim</button>
+      </div>
+    </div>
   </div>
-  <div id="wave"></div>
+  <div id="gameOver"></div>
 
-  <!-- 🌊 Sound Effects -->
-  <audio id="waveSound" src="https://www.soundjay.com/nature/ocean-wave-2.mp3" preload="auto"></audio>
-  <!-- 🎶 Ambient background -->
-  <audio id="ambient" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" preload="auto" loop></audio>
+  <audio id="revealSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_3f2b3e7a83.mp3?filename=correct-2-46134.mp3" preload="auto"></audio>
 
-  <script>
-    const WORDS_JSON = "./words.json";
+<script>
+const canvas = document.getElementById('bg');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-    let words = [];
-    let score = 0;
-    let lives = 3;
-    let pushBacks = 3;
-    let activeWords = [];
-    let spawnInterval = 6000;
-    let fallSpeed = 0.5;
-    let gameRunning = false;
-    let correctCount = 0;
-    let missed = [];
+// Falling leaves background
+const leaves = [];
+function createLeaf() {
+  return {
+    x: Math.random()*canvas.width,
+    y: -20,
+    size: 20+Math.random()*20,
+    speed: 0.5+Math.random()*1,
+    drift: (Math.random()-0.5)*0.5
+  };
+}
+for(let i=0;i<30;i++) leaves.push(createLeaf());
 
-    const gameArea = document.getElementById("gameArea");
-    const inputBox = document.getElementById("inputBox");
-    const scoreEl = document.getElementById("score");
-    const livesEl = document.getElementById("lives");
-    const pushBacksEl = document.getElementById("pushBacks");
-    const pushBackBtn = document.getElementById("pushBackBtn");
-    const gameOverEl = document.getElementById("gameOver");
-    const finalScoreEl = document.getElementById("finalScore");
-    const missedListEl = document.getElementById("missedList");
-    const waveEl = document.getElementById("wave");
-    const waveSound = document.getElementById("waveSound");
-    const ambient = document.getElementById("ambient");
+function drawLeaves(){
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  leaves.forEach(l=>{
+    ctx.beginPath();
+    ctx.ellipse(l.x, l.y, l.size*0.6, l.size, 0, 0, Math.PI*2);
+    ctx.fill();
+    l.y += l.speed;
+    l.x += l.drift;
+    if(l.y > canvas.height) Object.assign(l, createLeaf());
+  });
+}
 
-    async function loadWords() {
-      const res = await fetch(WORDS_JSON);
-      words = await res.json();
+// Words
+let words = [
+  {answer:"peace", clues:["A calm state","Opposite of war","Harmony"]},
+  {answer:"tranquil garden", clues:["A serene place","Often with flowers","Ideal for meditation"]},
+  {answer:"river", clues:["Flows gently","Body of water","Leads to ocean"]}
+];
+
+let groups = [];
+let score=0, lives=5;
+let pushbacks=3, trims=2;
+let correctCount=0;
+let missed=[];
+
+function spawnGroup(){
+  if(groups.length>=5) return;
+  const w = words[Math.floor(Math.random()*words.length)];
+  const g={
+    answer: w.answer,
+    clues: w.clues,
+    x: Math.random()*(canvas.width-300)+50,
+    y: -60,
+    speed: 0.5+Math.random()*0.5,
+    revealedLetters: Array.from({length:w.answer.length},(_,i)=>/[^a-zA-Z0-9]/.test(w.answer[i])),
+    revealStage:0
+  };
+  groups.push(g);
+}
+
+function maskAnswer(ans, revealed){
+  return ans.split('').map((c,i)=> revealed[i]?c:(/[^a-zA-Z0-9]/.test(c)?c:'_')).join(' ');
+}
+
+function drawGroups(){
+  ctx.font="24px Segoe UI";
+  ctx.textAlign="center";
+  groups.forEach(g=>{
+    g.y+=g.speed;
+
+    // progressive reveal by position
+    if(g.y>canvas.height*0.33 && g.revealStage<1){ revealLetter(g); g.revealStage=1; }
+    if(g.y>canvas.height*0.5 && g.revealStage<2){ revealLetter(g); g.revealStage=2; }
+    if(g.y>canvas.height*0.7 && g.revealStage<3){ revealLetter(g); g.revealStage=3; }
+
+    g.clues.forEach((c,i)=>{
+      ctx.fillStyle = '#333';
+      ctx.fillText(c, g.x, g.y+i*28);
+    });
+    ctx.fillStyle = '#666';
+    ctx.fillText(maskAnswer(g.answer, g.revealedLetters), g.x, g.y+g.clues.length*28+10);
+
+    if(g.y>canvas.height-30){
+      lives--; document.getElementById('lives').textContent=lives;
+      missed.push({answer:g.answer, clues:g.clues});
+      groups=groups.filter(x=>x!==g);
+      if(lives<=0) endGame();
     }
+  });
+}
 
-    function startGame() {
-      score = 0;
-      lives = 3;
-      pushBacks = 3;
-      correctCount = 0;
-      spawnInterval = 6000;
-      fallSpeed = 0.5;
-      missed = [];
-      activeWords.forEach(w => w.el.remove());
-      activeWords = [];
-      scoreEl.textContent = score;
-      livesEl.textContent = lives;
-      pushBacksEl.textContent = pushBacks;
-      pushBackBtn.disabled = false;
-      gameOverEl.style.display = "none";
-      gameRunning = true;
-      ambient.volume = 0.2;
-      ambient.play().catch(() => {}); // browsers block autoplay until user interaction
-      gameLoop();
-      spawnWord();
-    }
+function revealLetter(g){
+  const unrevealed=[];
+  g.answer.split('').forEach((c,i)=>{ if(!g.revealedLetters[i] && /[a-zA-Z0-9]/.test(c)) unrevealed.push(i); });
+  if(unrevealed.length===0) return;
+  const idx=unrevealed[Math.floor(Math.random()*unrevealed.length)];
+  g.revealedLetters[idx]=true;
+  document.getElementById('revealSound').play().catch(()=>{});
+}
 
-    function spawnWord() {
-      if (!gameRunning || activeWords.length >= 5) {
-        setTimeout(spawnWord, spawnInterval);
-        return;
-      }
-      const word = words[Math.floor(Math.random() * words.length)];
+function gameLoop(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawLeaves();
+  drawGroups();
+  requestAnimationFrame(gameLoop);
+}
 
-      let x, safe;
-      do {
-        x = Math.random() * (window.innerWidth - 300);
-        safe = activeWords.every(w => Math.abs(parseFloat(w.el.style.left) - x) > 220);
-      } while (!safe);
+function checkGuess(){
+  const val=document.getElementById('guess').value.trim().toLowerCase();
+  if(!val) return;
+  const g=groups.find(x=>x.answer.toLowerCase()===val);
+  if(g){
+    score+=5; correctCount++;
+    if(correctCount%5===0) pushbacks++;
+    if(correctCount%3===0) trims++;
+    updateUI();
+    groups=groups.filter(x=>x!==g);
+  }
+  document.getElementById('guess').value='';
+}
 
-      const el = document.createElement("div");
-      el.className = "clueGroup";
-      el.style.left = x + "px";
+function updateUI(){
+  document.getElementById('score').textContent=score;
+  document.getElementById('lives').textContent=lives;
+  document.getElementById('pushbacks').textContent=pushbacks;
+  document.getElementById('trims').textContent=trims;
+}
 
-      word.clues.forEach((clue, idx) => {
-        const line = document.createElement("div");
-        line.className = "clueLine" + (idx > 0 ? " hidden" : "");
-        line.textContent = clue;
-        el.appendChild(line);
-      });
+function pushback(){
+  if(pushbacks<=0) return;
+  pushbacks--; updateUI();
+  groups.forEach(g=> g.y=Math.max(g.y-canvas.height*0.5,-60));
+}
 
-      gameArea.appendChild(el);
-      activeWords.push({ answer: word.answer, clues: word.clues, el, y: -80, revealed: [true, false, false] });
+function trim(){
+  if(trims<=0) return;
+  trims--; updateUI();
+  let lowest = groups.reduce((a,b)=> a.y>b.y?a:b, groups[0]);
+  if(lowest){ groups=groups.filter(g=>g!==lowest); }
+}
 
-      setTimeout(spawnWord, spawnInterval);
-    }
+function endGame(){
+  document.getElementById('gameOver').style.display='block';
+  let html=`<h2>Game Over</h2><p>Score: ${score}</p>`;
+  if(missed.length>0){
+    html+="<h3>Missed:</h3><ul>";
+    missed.forEach(m=>{ html+=`<li><strong>${m.answer}</strong>: ${m.clues.join(', ')}</li>`; });
+    html+="</ul>";
+  }
+  document.getElementById('gameOver').innerHTML=html;
+}
 
-    function gameLoop() {
-      if (!gameRunning) return;
+document.getElementById('guess').addEventListener('keydown',e=>{if(e.key==='Enter') checkGuess();});
+document.getElementById('pushbackBtn').onclick=pushback;
+document.getElementById('trimBtn').onclick=trim;
 
-      activeWords.forEach((w, i) => {
-        w.y += fallSpeed;
-        w.el.style.top = w.y + "px";
-
-        const lines = w.el.querySelectorAll(".clueLine");
-        if (w.y > window.innerHeight / 3 && !w.revealed[1] && lines[1]) {
-          lines[1].classList.remove("hidden");
-          w.revealed[1] = true;
-        }
-        if (w.y > window.innerHeight / 2 && !w.revealed[2] && lines[2]) {
-          lines[2].classList.remove("hidden");
-          w.revealed[2] = true;
-        }
-
-        if (w.y > window.innerHeight - 80) {
-          if (!w.el.querySelector(".reveal-answer")) {
-            const ans = document.createElement("div");
-            ans.className = "reveal-answer";
-            ans.textContent = `Answer: ${w.answer}`;
-            w.el.appendChild(ans);
-            missed.push({ answer: w.answer, clues: w.clues });
-          }
-          setTimeout(() => { if (w.el.parentNode) gameArea.removeChild(w.el); }, 1500);
-          activeWords.splice(i, 1);
-          lives--;
-          livesEl.textContent = lives;
-          if (lives <= 0) endGame();
-        }
-      });
-
-      if (score >= 30) { fallSpeed = 0.8; spawnInterval = 5000; }
-      if (score >= 80) { fallSpeed = 1.2; spawnInterval = 4000; }
-      if (score >= 150) { fallSpeed = 1.8; spawnInterval = 3000; }
-
-      requestAnimationFrame(gameLoop);
-    }
-
-    function normalize(text) {
-      return text.toLowerCase().replace(/[^a-z0-9]/gi, '');
-    }
-
-    function checkInput() {
-      const text = inputBox.value.trim();
-      if (!text) return;
-      for (let i = 0; i < activeWords.length; i++) {
-        if (normalize(text) === normalize(activeWords[i].answer)) {
-          score += 5;
-          correctCount++;
-          scoreEl.textContent = score;
-
-          activeWords[i].el.classList.add("fade-out");
-          setTimeout(() => { if (activeWords[i].el.parentNode) gameArea.removeChild(activeWords[i].el); }, 1000);
-          activeWords.splice(i, 1);
-          inputBox.value = "";
-
-          if (correctCount % 5 === 0) {
-            pushBacks++;
-            pushBacksEl.textContent = pushBacks;
-            pushBackBtn.disabled = false;
-          }
-          return;
-        }
-      }
-    }
-
-    function endGame() {
-      gameRunning = false;
-      finalScoreEl.textContent = score;
-      missedListEl.innerHTML = "<strong>Missed Words:</strong><br>" +
-        (missed.length ? missed.map(m => `<div>❌ ${m.answer} — Clues: ${m.clues.join(", ")}</div>`).join("") : "None");
-      gameOverEl.style.display = "block";
-      ambient.pause();
-    }
-
-    function pushBack() {
-      if (pushBacks <= 0) return;
-      pushBacks--;
-      pushBacksEl.textContent = pushBacks;
-      if (pushBacks <= 0) pushBackBtn.disabled = true;
-
-      waveEl.classList.add("animate");
-      waveSound.currentTime = 0;
-      waveSound.play();
-      setTimeout(() => waveEl.classList.remove("animate"), 1500);
-
-      activeWords.forEach(w => {
-        w.y = Math.max(w.y - window.innerHeight / 2, -80);
-      });
-    }
-
-    inputBox.addEventListener("input", checkInput);
-    pushBackBtn.addEventListener("click", pushBack);
-
-    function spawnLeaf() {
-      const leaf = document.createElement("div");
-      leaf.className = "leaf";
-      leaf.style.left = Math.random() * window.innerWidth + "px";
-      const duration = 10 + Math.random() * 10;
-      leaf.style.animationDuration = duration + "s";
-      document.body.appendChild(leaf);
-      setTimeout(() => leaf.remove(), duration * 1000);
-      setTimeout(spawnLeaf, 1500);
-    }
-
-    loadWords().then(startGame);
-    spawnLeaf();
-  </script>
+setInterval(spawnGroup,4000);
+updateUI();
+gameLoop();
+</script>
 </body>
 </html>
