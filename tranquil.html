@@ -1,225 +1,226 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tranquil Typing Game</title>
-<style>
-  body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(#a8edea, #fed6e3);
-    overflow: hidden;
-    color: #333;
-  }
-  canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-  }
-  #ui {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    z-index: 10;
-    width: 100%;
-    max-width: 600px;
-  }
-  #inputBox {
-    margin-top: 20px;
-  }
-  input {
-    padding: 12px;
-    font-size: 1.5rem;
-    border-radius: 12px;
-    border: none;
-    outline: none;
-    text-align: center;
-    width: 80%;
-    max-width: 400px;
-  }
-  button {
-    padding: 10px 18px;
-    margin: 6px;
-    border-radius: 20px;
-    border: none;
-    cursor: pointer;
-    background: #fff;
-    color: #333;
-    font-weight: bold;
-    transition: transform 0.2s;
-  }
-  button:hover { transform: scale(1.05); }
-  #gameOver {
-    display: none;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(255,255,255,0.9);
-    padding: 30px;
-    border-radius: 20px;
-    text-align: center;
-    font-size: 1.8rem;
-    max-width: 600px;
-    z-index: 20;
-  }
-  .highlight {
-    color: #ff9900;
-    text-shadow: 0 0 8px #ffcc00;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tranquil Typing Game</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(#a8edea, #fed6e3);
+      overflow: hidden;
+      color: #333;
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+    #ui {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 10;
+      width: 100%;
+      max-width: 600px;
+    }
+    #inputBox {
+      margin-top: 20px;
+    }
+    input {
+      padding: 12px;
+      font-size: 1.5rem;
+      border-radius: 12px;
+      border: none;
+      outline: none;
+      text-align: center;
+      width: 80%;
+      max-width: 400px;
+    }
+    button {
+      padding: 10px 18px;
+      margin: 6px;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+      background: #fff;
+      color: #333;
+      font-weight: bold;
+      transition: transform 0.2s;
+    }
+    button:hover { transform: scale(1.05); }
+    #gameOver {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255,255,255,0.9);
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      font-size: 1.8rem;
+      max-width: 600px;
+      z-index: 20;
+    }
+    .highlight {
+      color: #ff9900;
+      text-shadow: 0 0 8px #ffcc00;
+    }
+  </style>
 </head>
 <body>
-<canvas id="bg"></canvas>
-<div id="ui">
-  <div>Score: <span id="score">0</span> | Lives: <span id="lives">5</span></div>
-  <div>Pushbacks: <span id="pushbacks">3</span> | Trims: <span id="trims">2</span></div>
-  <div id="inputBox">
-    <input id="guess" placeholder="Type your answer..." />
-    <div>
-      <button id="pushbackBtn">Pushback</button>
-      <button id="trimBtn">Trim</button>
+  <canvas id="bg"></canvas>
+  <div id="ui">
+    <div>Score: <span id="score">0</span> | Lives: <span id="lives">5</span></div>
+    <div>Pushbacks: <span id="pushbacks">3</span> | Trims: <span id="trims">2</span></div>
+    <div id="inputBox">
+      <input id="guess" placeholder="Type your answer..." />
+      <div>
+        <button id="pushbackBtn">Pushback</button>
+        <button id="trimBtn">Trim</button>
+      </div>
     </div>
   </div>
-</div>
-<div id="gameOver"></div>
-<audio id="revealSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_3f2b3e7a83.mp3?filename=correct-2-46134.mp3" preload="auto"></audio>
-<script>
-const canvas = document.getElementById('bg');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+  <div id="gameOver"></div>
+  <audio id="revealSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_3f2b3e7a83.mp3?filename=correct-2-46134.mp3" preload="auto"></audio>
+  <script>
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-const leaves = [];
-function createLeaf() {
-  return { x: Math.random()*canvas.width, y: -20, size: 20+Math.random()*20, speed: 0.5+Math.random(), drift: (Math.random()-0.5)*0.5 };
-}
-for(let i=0;i<30;i++) leaves.push(createLeaf());
-function drawLeaves(){
-  ctx.fillStyle = 'rgba(255,255,255,0.2)';
-  leaves.forEach(l=>{
-    ctx.beginPath();
-    ctx.ellipse(l.x, l.y, l.size*0.6, l.size, 0, 0, Math.PI*2);
-    ctx.fill();
-    l.y += l.speed;
-    l.x += l.drift;
-    if(l.y > canvas.height) Object.assign(l, createLeaf());
-  });
-}
-
-let words = [
-  {answer:"peace", clues:["A calm state","Opposite of war","Harmony"]},
-  {answer:"tranquil garden", clues:["A serene place","Often with flowers","Ideal for meditation"]},
-  {answer:"river", clues:["Flows gently","Body of water","Leads to ocean"]}
-];
-
-let groups=[], score=0, lives=5, pushbacks=3, trims=2, correctCount=0, missed=[];
-
-function spawnGroup(){
-  if(groups.length>=5) return;
-  const w = words[Math.floor(Math.random()*words.length)];
-  const g={ answer: w.answer, clues: w.clues, x: Math.random()*(canvas.width-300)+50, y: -60, speed: 0.5+Math.random()*0.5, revealedLetters: Array.from({length:w.answer.length},(_,i)=>/[^a-zA-Z0-9]/.test(w.answer[i])), revealStage:0 };
-  groups.push(g);
-}
-
-function maskAnswer(ans, revealed){
-  return ans.split('').map((c,i)=> revealed[i]?c:(/[^a-zA-Z0-9]/.test(c)?c:'_')).join(' ');
-}
-
-function drawGroups(){
-  ctx.font="24px Segoe UI";
-  ctx.textAlign="center";
-  groups.forEach(g=>{
-    g.y+=g.speed;
-    if(g.y>canvas.height*0.33 && g.revealStage<1){ revealLetter(g); g.revealStage=1; }
-    if(g.y>canvas.height*0.5 && g.revealStage<2){ revealLetter(g); g.revealStage=2; }
-    if(g.y>canvas.height*0.7 && g.revealStage<3){ revealLetter(g); g.revealStage=3; }
-    g.clues.forEach((c,i)=>{ ctx.fillStyle = '#333'; ctx.fillText(c, g.x, g.y+i*28); });
-    ctx.fillStyle = '#666';
-    ctx.fillText(maskAnswer(g.answer, g.revealedLetters), g.x, g.y+g.clues.length*28+10);
-    if(g.y>canvas.height-30){
-      lives--; document.getElementById('lives').textContent=lives;
-      missed.push({answer:g.answer, clues:g.clues});
-      groups=groups.filter(x=>x!==g);
-      if(lives<=0) endGame();
+    const leaves = [];
+    function createLeaf() {
+      return { x: Math.random() * canvas.width, y: -20, size: 20 + Math.random() * 20, speed: 0.5 + Math.random(), drift: (Math.random() - 0.5) * 0.5 };
     }
-  });
-}
+    for (let i = 0; i < 30; i++) leaves.push(createLeaf());
+    function drawLeaves() {
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      leaves.forEach(l => {
+        ctx.beginPath();
+        ctx.ellipse(l.x, l.y, l.size * 0.6, l.size, 0, 0, Math.PI * 2);
+        ctx.fill();
+        l.y += l.speed;
+        l.x += l.drift;
+        if (l.y > canvas.height) Object.assign(l, createLeaf());
+      });
+    }
 
-function revealLetter(g){
-  const unrevealed=[];
-  g.answer.split('').forEach((c,i)=>{ if(!g.revealedLetters[i] && /[a-zA-Z0-9]/.test(c)) unrevealed.push(i); });
-  if(unrevealed.length===0) return;
-  const idx=unrevealed[Math.floor(Math.random()*unrevealed.length)];
-  g.revealedLetters[idx]=true;
-  document.getElementById('revealSound').play().catch(()=>{});
-}
+    let words = [];
+    async function loadWords() {
+      try {
+        const res = await fetch('https://raw.githubusercontent.com/mrcmcalpine/CS_Definition_Battle/main/words.json');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        words = await res.json();
+        console.log('Words loaded:', words);
+      } catch (err) {
+        console.error('Failed to load words:', err);
+      }
+    }
 
-function gameLoop(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  drawLeaves();
-  drawGroups();
-  requestAnimationFrame(gameLoop);
-}
+    let groups = [], score = 0, lives = 5, pushbacks = 3, trims = 2, correctCount = 0, missed = [];
 
-function checkGuess(){
-  const val=document.getElementById('guess').value.trim().toLowerCase();
-  if(!val) return;
-  const g=groups.find(x=>x.answer.toLowerCase()===val);
-  if(g){
-    score+=5; correctCount++;
-    if(correctCount%5===0) pushbacks++;
-    if(correctCount%3===0) trims++;
-    updateUI();
-    groups=groups.filter(x=>x!==g);
-  }
-  document.getElementById('guess').value='';
-}
+    function spawnGroup() {
+      if (groups.length >= 5) return;
+      const w = words[Math.floor(Math.random() * words.length)];
+      const g = { answer: w.answer, clues: w.clues, x: Math.random() * (canvas.width - 300) + 50, y: -60, speed: 0.5 + Math.random() * 0.5, revealedLetters: Array.from({ length: w.answer.length }, (_, i) => /[^a-zA-Z0-9]/.test(w.answer[i])), revealStage: 0 };
+      groups.push(g);
+    }
 
-function updateUI(){
-  document.getElementById('score').textContent=score;
-  document.getElementById('lives').textContent=lives;
-  document.getElementById('pushbacks').textContent=pushbacks;
-  document.getElementById('trims').textContent=trims;
-}
+    function maskAnswer(ans, revealed) {
+      return ans.split('').map((c, i) => revealed[i] ? c : (/[^a-zA-Z0-9]/.test(c) ? c : '_')).join(' ');
+    }
 
-function pushback(){
-  if(pushbacks<=0) return;
-  pushbacks--; updateUI();
-  groups.forEach(g=> g.y=Math.max(g.y-canvas.height*0.5,-60));
-}
+    function drawGroups() {
+      ctx.font = "24px Segoe UI";
+      ctx.textAlign = "center";
+      groups.forEach(g => {
+        g.y += g.speed;
+        if (g.y > canvas.height * 0.33 && g.revealStage < 1) { revealLetter(g); g.revealStage = 1; }
+        if (g.y > canvas.height * 0.5 && g.revealStage < 2) { revealLetter(g); g.revealStage = 2; }
+        if (g.y > canvas.height * 0.7 && g.revealStage < 3) { revealLetter(g); g.revealStage = 3; }
+        g.clues.forEach((c, i) => { ctx.fillStyle = '#333'; ctx.fillText(c, g.x, g.y + i * 28); });
+        ctx.fillStyle = '#666';
+        ctx.fillText(maskAnswer(g.answer, g.revealedLetters), g.x, g.y + g.clues.length * 28 + 10);
+        if (g.y > canvas.height - 30) {
+          lives--; document.getElementById('lives').textContent = lives;
+          missed.push({ answer: g.answer, clues: g.clues });
+          groups = groups.filter(x => x !== g);
+          if (lives <= 0) endGame();
+        }
+      });
+    }
 
-function trim(){
-  if(trims<=0) return;
-  trims--; updateUI();
-  let lowest = groups.reduce((a,b)=> a.y>b.y?a:b, groups[0]);
-  if(lowest){ groups=groups.filter(g=>g!==lowest); }
-}
+    function revealLetter(g) {
+      const unrevealed = [];
+      g.answer.split('').forEach((c, i) => { if (!g.revealedLetters[i] && /[a-zA-Z0-9]/.test(c)) unrevealed.push(i); });
+      if (unrevealed.length === 0) return;
+      const idx = unrevealed[Math.floor(Math.random() * unrevealed.length)];
+      g.revealedLetters[idx] = true;
+      document.getElementById('revealSound').play().catch(() => {});
+    }
 
-function endGame(){
-  document.getElementById('gameOver').style.display='block';
-  let html=`<h2>Game Over</h2><p>Score: ${score}</p>`;
-  if(missed.length>0){
-    html+="<h3>Missed:</h3><ul>";
-    missed.forEach(m=>{ html+=`<li><strong>${m.answer}</strong>: ${m.clues.join(', ')}</li>`; });
-    html+="</ul>";
-  }
-  document.getElementById('gameOver').innerHTML=html;
-}
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawLeaves();
+      drawGroups();
+      requestAnimationFrame(gameLoop);
+    }
 
-document.getElementById('guess').addEventListener('keydown',e=>{if(e.key==='Enter') checkGuess();});
-document.getElementById('pushbackBtn').onclick=pushback;
-document.getElementById('trimBtn').onclick=trim;
+    function checkGuess() {
+      const val = document.getElementById('guess').value.trim().toLowerCase();
+      if (!val) return;
+      const g = groups.find(x => x.answer.toLowerCase() === val);
+      if (g) {
+        score += 5; correctCount++;
+        if (correctCount % 5 === 0) pushbacks++;
+        if (correctCount % 3 === 0) trims++;
+        updateUI();
+        groups = groups.filter(x => x !== g);
+      }
+      document.getElementById('guess').value = '';
+    }
 
-setInterval(spawnGroup,4000);
-updateUI();
-gameLoop();
-</script>
-</body>
-</html>
+    function updateUI() {
+      document.getElementById('score').textContent = score;
+      document.getElementById('lives').textContent = lives;
+      document.getElementById('pushbacks').textContent = pushbacks;
+      document.getElementById('trims').textContent = trims;
+    }
+
+    function pushback() {
+      if (pushbacks <= 0) return;
+      pushbacks--; updateUI();
+      groups.forEach(g => g.y = Math.max(g.y - canvas.height * 0.5, -60));
+    }
+
+    function trim() {
+      if (trims <= 0) return;
+      trims--; updateUI();
+      let lowest = groups.reduce((a, b) => a.y > b.y ? a : b, groups[0]);
+      if (lowest) { groups = groups.filter(g => g !== lowest); }
+    }
+
+    function endGame() {
+      document.getElementById('gameOver').style.display = 'block';
+      let html = `<h2>Game Over</h2><p>Score: ${score}</p>`;
+      if (missed.length > 0) {
+        html += "<h3>Missed:</h3><ul>";
+        missed.forEach(m => { html += `<li><strong>${m.answer}</strong>: ${m.clues.join(', ')}</li>`; });
+        html += "</ul>";
+      }
+      document.getElementById('gameOver').innerHTML = html;
+    }
+
+    document.getElementById('guess').addEventListener('keydown', e => { if (e.key === 'Enter') checkGuess(); });
+    document.getElementById('pushbackBtn').onclick = pushback;
+    document.getElementById('trimBtn').onclick = trim
+::contentReference[oaicite:0]{index=0}
+ 
